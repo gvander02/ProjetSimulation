@@ -12,6 +12,9 @@ with open(fichier, "r") as donnees_initiales:
 donnees_finales={'time':[]}
 for i in range(0, len(donnees_utiles["time"]), 24):
     donnees_finales['time'].append(donnees_utiles["time"][i][:10])
+# changer la date au numero du jour de l'annee (1 à 366)
+for i in range(0, len(donnees_finales['time'])):
+    donnees_finales['time'][i] = i+1
 
 #faire la somme des precipitations par jours
 donnees_finales.update({'precipitation':[]})
