@@ -4,50 +4,60 @@ import math
 import json
 import csv
 
-fichier = "aletsch.json" #input("Nom fichier: ")
+fichiers = ["aletsch2016.json","aletsch2017.json","aletsch2018.json","aletsch2019.json","aletsch2020.json"]
 #recuperer les donnees necessaires a notre simulation du fichier meteoblue json
-with open(fichier, "r") as donnees_initiales:
-    donnees_initiales = json.load(donnees_initiales)
-    donnees_utiles = {"altitude": donnees_initiales.get("metadata").get("height")}
-    donnees_utiles.update({ 'time': donnees_initiales.get("history_1h").get("time")})
-    donnees_utiles.update({'precipitation': donnees_initiales.get("history_1h").get("precipitation")})
-    donnees_utiles.update({'temperature': donnees_initiales.get("history_1h").get("temperature")})
+def telecharger(dossier):
+    with open(dossier, "r") as donnees_initiales:
+        donnees_initiales = json.load(donnees_initiales)
+        donnees_utiles = {"altitude": donnees_initiales.get("metadata").get("height")}
+        donnees_utiles.update({ 'time': donnees_initiales.get("history_1h").get("time")})
+        donnees_utiles.update({'precipitation': donnees_initiales.get("history_1h").get("precipitation")})
+        donnees_utiles.update({'temperature': donnees_initiales.get("history_1h").get("temperature")})
+    return donnees_utiles
 
-#changement d'unite temporelle, passer d'heures en jour, et du coup ne garder que la date 
+Calculalt = telecharger(fichiers[1])
+
 donnees_finales={'time':[]}
-for i in range(0, len(donnees_utiles["time"]), 24):
-    donnees_finales['time'].append(donnees_utiles["time"][i][:10])
-
-#faire la somme des precipitations par jours
 donnees_finales.update({'precipitation':[]})
-for i in range(0, len(donnees_utiles["precipitation"]), 24):
-    somme = 0
-    for j in range(i,i+24):
-        somme += donnees_utiles["precipitation"][j]
-    donnees_finales["precipitation"].append(somme)
-
-#moyenne des temperatures par jours
 donnees_finales.update({'temperature': []})
-for i in range(0, len(donnees_utiles["temperature"]), 24):
-    somme = 0
-    for j in range(i, i+24):
-        somme += donnees_utiles["temperature"][j]
-    donnees_finales["temperature"].append(somme/24)
+
+def dictionnaire(dossier):
+    #changement d'unite temporelle, passer d'heures en jour, et du coup ne garder que la date 
+    #for i in range(0, len(telecharger(dossier)["time"]), 24):
+    #    donnees_finales['time'].append(telecharger(dossier)["time"][i][:10])
+    doss = telecharger(dossier)
+    #faire la somme des precipitations par jours
+    for i in range(0, len(doss["precipitation"]), 24):
+        somme = 0
+        for j in range(i,i+24):
+            somme += doss["precipitation"][j]
+            donnees_finales["precipitation"].append(somme)
+
+    #moyenne des temperatures par jours
+    for i in range(0, len(doss["temperature"]), 24):
+        somme = 0
+        for j in range(i, i+24):
+            somme += doss["temperature"][j]
+            donnees_finales["temperature"].append(somme/24)
+    return donnees_finales
+
+for i in range(len(fichiers)):
+    dictionnaire(fichiers[i])
 
 ##Dimension glacier
 H = 200#float(input("Quelle est l'épaisseur du glacier?"))
 P = 0.2#float(input("Quelle est la pente moyenne du glacier? En pourcentage"))/100
 L = 1500#int(input("Quelle est la longueur du glacier?"))
 Larg = 300#int(input("Quelle est la largeur du glacier?"))
-tps = 366#float(input("Temps de la simulation (en jour)"))
-Alt = donnees_utiles["altitude"] #on suppose que le point des données est le sommet du glacier
+tps = 360#float(input("Temps de la simulation (en jour)"))
+Alt = Calculalt["altitude"] #on suppose que le point des données est le sommet du glacier
 alpha = P*100*math.pi/180 #radians
 BaseG = Alt - (P*L)
 BaseR = Alt - (P*(L+400)+H)
 ##Constantes
 Patm = ...
 V = 10/365 #m/jour
-p = 900 #m^3/kg
+p = 917 #kg/m^3
 g = 9.81 #constante pesanteur m/s^2
 n = math.pow(10,14) #viscosité en Pascal*s
 k = p*g/n
@@ -129,28 +139,66 @@ plt.legend()
 
 ##Modele d'enneigement
 #coeff d'enneigement par rapport à l'altitude
-Coeff = 0.0001
+Coeff = 0.00005
 #valeurs enneigement par jour
 #la neige a un coefficient de 10 par rapport à la précipitation
 #pour l'avoir en mètre nous devons uniquement le diviser par 100
-ValeursEnneigement = []
+Valeursprecipitation = []
 for i in range(len(donnees_finales["precipitation"])):
-    ValeursEnneigement.append(donnees_finales["precipitation"][i]/100)
+    Valeursprecipitation.append(donnees_finales["precipitation"][i]/100)
 
 Varneige = []
 
+Ts = []  #Température surface
+for i in range(len(donnees_finales["temperature"])):
+    TempJ = []
+    for j in range(L):
+        TempJ.append(273 + donnees_finales["temperature"][i]+ 6.5*P*j/1000)#P ou math.tan(alpha)
+    Ts.append(TempJ)
+
+E = []#on commence l'année avec un enneigement initiale de (2m si en hiver)
+for i in range(L):
+    E.append(2.0)
+    
 def neige(jour):
-    #on commence l'année avec un enneigement initiale de (2m si en hiver)
-    E = 2.0
     if jour > 4: #4 = nbrs jour pour transformer en glace:
         for i in range(jour-4):
-            E = E + ValeursEnneigement[i]/10
-        for j in range(4):
-            E = E + ValeursEnneigement[jour-4+j]
+            for j in range(L):
+                if Ts[i][j]<=273:
+                    valeur = Valeursprecipitation[i]/10 + E[j] - Coeff*P*j
+                    if valeur > 0:
+                        del E[j]
+                        E.insert(j,valeur)
+                else:
+                    valeur = E[j] - Valeursprecipitation[i] 
+                    del E[j]
+                    E.insert(j, valeur)
+        for i in range(4):
+            for j in range(L):
+                if Ts[i][j]<=273:
+                    valeur = Valeursprecipitation[jour-4+i]/10 + E[j] - Coeff*P*j
+                    if valeur > 0:
+                        del E[j]
+                        E.insert(j,valeur)
+                else:
+                    valeur = E[j] - Valeursprecipitation[i] 
+                    del E[j]
+                    E.insert(j, valeur)
     else:
         for i in range(jour):
-            E = E + ValeursEnneigement[i]
+            for j in range(L):
+                if Ts[i][j]<=273:
+                    valeur = Valeursprecipitation[i]/10 + E[j] - Coeff*P*j
+                    if valeur > 0:
+                        del E[j]
+                        E.insert(j,valeur)
+                else:
+                    valeur = E[j] - Valeursprecipitation[i] 
+                    del E[j]
+                    E.insert(j, valeur)
+
     return E
+neige(tps)
 
 x = np.linspace (0, L, L)
 
@@ -165,18 +213,9 @@ Z.append(BaseR)
 
 #niveau de la neige
 for i in range(L):
-    Varneige.append(neige(tps)-Coeff*P*i)
-    Varneige[i] = Varneige[i]+Z[i]
-
+    Varneige.append(E[i]+Z[i])
 
 ##Modele de fonte
-Ts = []  #Température surface
-for i in range(len(donnees_finales["temperature"])):
-    TempJ = []
-    for j in range(L):
-        TempJ.append(273 + donnees_finales["temperature"][i]+ 6.5*P*j/1000)#P ou math.tan(alpha)
-    Ts.append(TempJ)
-    
 htt = []
 for i in range(L):
     htt.append(BaseG + P*L - P*i)
@@ -238,11 +277,18 @@ plt.show()
 
 #Envoyer les données csv pour le calcul en C.
 liste_difference = []
+liste_diffinal = []
 for i in range(L):
+    diffinal = Z[i] - ht[i]
     diff = Varneige[i] - ht[i]
+    liste_diffinal.append(diffinal)
     liste_difference.append(diff)
 del liste_difference[0]
+del liste_diffinal[0]
+del Z[0]
 csv_columns = ['Hauteur perdue dans la fonte']
 with open('donnees_fonte.csv', 'w') as csv_file:
     writer = csv.writer(csv_file)
     writer.writerow(liste_difference)
+    writer.writerow(Z)
+    writer.writerow(liste_diffinal)
