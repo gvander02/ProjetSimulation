@@ -49,7 +49,7 @@ H = 200#float(input("Quelle est l'épaisseur du glacier?"))
 P = 0.2#float(input("Quelle est la pente moyenne du glacier? En pourcentage"))/100
 L = 1500#int(input("Quelle est la longueur du glacier?"))
 Larg = 300#int(input("Quelle est la largeur du glacier?"))
-tps = 360#float(input("Temps de la simulation (en jour)"))
+tps = 1825#float(input("Temps de la simulation (en jour)"))
 Alt = Calculalt["altitude"] #on suppose que le point des données est le sommet du glacier
 alpha = P*100*math.pi/180 #radians
 BaseG = Alt - (P*L)
@@ -291,4 +291,5 @@ with open('donnees_fonte.csv', 'w') as csv_file:
     writer = csv.writer(csv_file)
     writer.writerow(liste_difference)
     writer.writerow(Z)
+    writer.writerow(E)
     writer.writerow(liste_diffinal)
