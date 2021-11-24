@@ -15,7 +15,7 @@ def telecharger(dossier):
         donnees_utiles.update({'temperature': donnees_initiales.get("history_1h").get("temperature")})
     return donnees_utiles
 
-Calculalt = telecharger(fichiers[1])
+Calculalt = telecharger(fichiers[0])
 
 donnees_finales={'time':[]}
 donnees_finales.update({'precipitation':[]})
@@ -67,6 +67,7 @@ Dt = 2.215 #Diffusion thermique
 CL = 0.33*(10**6) #Chaleur Latente 
 Tr = 273 + 0.0 #Température à la roche
 
+
 ##Création du graphique 3D
 x1 = np.linspace(0, L+500, L+500)
 x2 = np.linspace(0, Larg+200, Larg+200)
@@ -75,6 +76,10 @@ X1, X2 = np.meshgrid(x1, x2)
 xx1 = np.linspace (100, L+100, L)
 xx2 = np.linspace (100, Larg+100, Larg)
 XX1, XX2 = np.meshgrid(xx1, xx2)
+
+xxx2 = np.linspace(100, Larg+100, Larg)
+xxx1 = np.linspace(100, L+500, L+500)
+XXX1, XXX2 = np.meshgrid(xxx1, xxx2)
 
 #niveau du sol
 def roche(x,y):
@@ -123,8 +128,10 @@ vv = np.array(vv)
 deplacement = []
 for i in range(H-1):
     deplacement.append(L + tps*vv[i])
-deplacement.append(0)
+deplacement.append(L)
 dep = np.array(deplacement)
+
+BaseGfinal = BaseG - P*(dep[-2]-L)
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -200,10 +207,13 @@ def neige(jour):
     return E
 neige(tps)
 
-x = np.linspace (0, L, L)
 
+dp = int(dep[-2])
+x = np.linspace (0, L, L)
+xxx = np.linspace(0, dp, dp)
+yyy = np.linspace(BaseR, BaseGfinal, H)
 #niveau du sol y
-y = P*L-P*x + BaseR
+y = P*L-P*xxx + BaseR
 
 #hauteur glacier au temps t0
 Z = [BaseR + P*L]
@@ -230,15 +240,23 @@ def Fonte(temps):
                 htt.insert(j, fonte)
     return htt
 Fonte(tps)
+Pentefinal = (htt[0]-htt[-1])/L
+Xmax = int(dep[-2]-L)
 ht =[Z[0]]
-for i in range(1,L-1):
+for i in range(L-1):
     total = htt[i]+Varneige[i]-Z[i]
     ht.append(total)
-ht.append(Z[-1])
+k = ht[-1]
+for i in range(Xmax):
+    ht.append(k - Pentefinal*i)
 
 h = np.array(ht)
 e = np.array(Varneige)
 z = np.array(Z)
+
+del deplacement[-1]
+deplacement.append(deplacement[-1])
+dep2 = np.array(deplacement)
 
 #taille égale des axes 
 fig = plt.figure()
@@ -246,8 +264,9 @@ ax = fig.add_subplot(111)
 ax.set_aspect('equal', adjustable='box')
 plt.plot(x, e, label="Enneigement")
 plt.plot(x, z, label="Glacier au temps t0")
-plt.plot(x, y, label="Roche")
-plt.plot(x, h, label="Glacier au temps t")
+plt.plot(xxx, y, label="Roche")
+plt.plot(xxx, h, label="Glacier au temps t", color = "red")
+plt.plot(dep2, yyy, color = "red")
 plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
 plt.legend()
@@ -258,8 +277,8 @@ ZgT = []
 for i in range(Larg):
     ZgT.append(ht)
 for i in range(Larg):
-    ZgT[i][0] = htt[0] + Varneige[0] - Z[0]
-    ZgT[i][-1] = htt[-1] + Varneige[-1] - Z[-1]
+    ZgT[i][0] = ht[1] #htt[0] + Varneige[0] - Z[0]
+    ZgT[i][-1] = ht[-2]# htt[-1] + Varneige[-1] - Z[-1]
 Zgt = np.array(ZgT)
 
 fig = plt.figure()
@@ -271,7 +290,7 @@ tailleR = 0.5
 tailleG = 5
 ax.plot_wireframe(X1, X2, Zr, tailleR, color='black')
 ax.plot_wireframe(XX1, XX2, Zg, tailleG, color='blue')
-ax.plot_wireframe(XX1, XX2, Zgt, tailleR, color='orange')
+ax.plot_wireframe(XXX1, XX2, Zgt, tailleR, color='orange')
 
 plt.show()
 
