@@ -6,11 +6,11 @@
 #include <time.h>
 
 // lire les donnees du fichier csv (jour, precipitation, temperature), et les mettre dans un tableau malloc
-bool lire_donnees_csv(char * nom_csv, double * values, int colonnes, int lignes){
+void lire_donnees_csv(char * nom_csv, double * values, int colonnes, int lignes){
     FILE * file = fopen(nom_csv, "r");
     if (file == NULL){
         fprintf(stderr, "File %s not found.\n", nom_csv);
-        return false;
+        //return false;
     }
     int y = 0;
     char buffer[100000];
@@ -30,7 +30,7 @@ bool lire_donnees_csv(char * nom_csv, double * values, int colonnes, int lignes)
         if (y>= lignes) break;
     }
     fclose(file);
-    return true;
+    //return true;
 }
 // lire fichier donnee issues des calculs du code python
 bool lire_calculs_python_csv(char * nom_csv, double * values, int index, int type){
@@ -76,10 +76,10 @@ double debit(double * differences, int y){ //y est la largeur de notre echantill
 
 // fonction qui fait un changement de la temperature d'une valeur aleatoire entre -1 et 3 par jour
 bool scenario_temp(double * values, double * temperatures_scen){
-    srandom(time(NULL));
+    srand(time(NULL));
     for(int i = 0; i<366; i++){
-        double randomDomain = RAND_MAX + 1.0;
-        int ajout = (int) (random() / randomDomain * 5 - 1);
+        double randDomain = RAND_MAX + 1.0;
+        int ajout = (int) (rand() / randDomain * 5 - 1);
         temperatures_scen[i] = values[3*i+2] + 273.0 + ajout;
         //printf("%f, ", temperatures_scen[i]);
     }
@@ -109,24 +109,43 @@ bool modele_fonte(double * hauteur, double * temperature, int time){
 
 }
 
+_Bool readCsv(char * filename, double * values, int sizeX, int sizeY) {
+    FILE * file = fopen(filename, "r");
+    if (file == NULL) {
+        fprintf(stderr, "File %s not found.", filename);
+		return "false";
+    }
+
+    int y = 0;
+    char buffer[1000000];
+    while (fgets(buffer, 1000000, file) != NULL) {
+        int x = 0;
+        char * start = buffer;
+        while ("true") {
+            values[y * sizeX + x] = atof(start);
+            start = strchr(start, ',');
+            if (start == NULL) break;
+            start += 1;
+
+            x += 1;
+            if (x >= sizeX) break;
+        }
+
+        y += 1;
+        if (y >= sizeY) break;
+    }
+
+    fclose(file);
+    return "true";
+}
+
 int main(){
-    double * calculs = calloc(6000, sizeof (double));
-    lire_donnees_csv("donnees_fonte.csv", calculs, 1500, 4);
+    double * calculs = calloc(9000, sizeof (double));
+    readCsv("donnees_fonte.csv", calculs, 4, 1500);
     // faire un tableau avec le calcul des differences
     double * difference= calloc(1500, sizeof(double));
     for(int i=0; i<10; i++){
-        printf("%f ,", calculs[i]);
-    }
-    printf("différences:\n");
-    for(int i=0; i<10; i++){
-        difference[i]=calculs[i];
-        printf("%f, ", difference[i]);
-    }
-    double values[3*366];
-    lire_donnees_csv("donnees_finales.csv", values, 3, 366);
-    printf("données finales:\n");
-    for (int i=0; i<10; i++) {
-        printf("%f, ", values[i]);
+        printf("%f\n", calculs[i]);
     }
     // somme des diff et diviser par nb de jours donne la moyenne
     //float moyenne_debit_jours = debit(difference,300)/366;

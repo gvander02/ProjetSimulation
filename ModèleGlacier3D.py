@@ -262,9 +262,9 @@ dep2 = np.array(deplacement)
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set_aspect('equal', adjustable='box')
-plt.plot(x, e, label="Enneigement")
-plt.plot(x, z, label="Glacier au temps t0")
-plt.plot(xxx, y, label="Roche")
+plt.plot(x, e, label="Enneigement", color='darkblue')
+plt.plot(x, z, label="Glacier au temps t0", color='blue')
+plt.plot(xxx, y, label="Roche", color="black")
 plt.plot(xxx, h, label="Glacier au temps t", color = "red")
 plt.plot(dep2, yyy, color = "red")
 plt.xlabel("longueur [m]")
@@ -290,7 +290,7 @@ tailleR = 0.5
 tailleG = 5
 ax.plot_wireframe(X1, X2, Zr, tailleR, color='black')
 ax.plot_wireframe(XX1, XX2, Zg, tailleG, color='blue')
-ax.plot_wireframe(XXX1, XX2, Zgt, tailleR, color='orange')
+ax.plot_wireframe(XXX1, XX2, Zgt, tailleR, color='red')
 
 plt.show()
 
@@ -305,10 +305,14 @@ for i in range(L):
 del liste_difference[0]
 del liste_diffinal[0]
 del Z[0]
-csv_columns = ['Hauteur perdue dans la fonte']
+#csv_columns = ['Hauteur perdue dans la fonte']
 with open('donnees_fonte.csv', 'w') as csv_file:
     writer = csv.writer(csv_file)
     writer.writerow(liste_difference)
     writer.writerow(Z)
     writer.writerow(E)
     writer.writerow(liste_diffinal)
+    
+with open('donnees_finales.csv', 'w') as csv_file:
+    writer = csv.writer(csv_file)
+    writer.writerow(donnees_finales)
