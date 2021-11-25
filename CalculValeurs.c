@@ -2,72 +2,68 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h> 
+#include <stdbool.h>
 
-_Bool readCsv(char * filename, double * values, int sizeX, int sizeY) {
-    FILE * file = fopen(filename, "r");
-    if (file == NULL) {
-        fprintf(stderr, "File %s not found.", filename);
-		return "false";
+_Bool lire_donnees_csv(char * nom_csv, double * values, int colonnes, int lignes){
+    FILE * file = fopen(nom_csv, "r");
+    if (file == NULL){
+        fprintf(stderr, "File %s not found.\n", nom_csv);
+        return false;
     }
-
     int y = 0;
-    char buffer[10000];
-    while (fgets(buffer, 10000, file) != NULL) {
-        int x = 0;
+    char buffer[100000];
+    //while(fgets(buffer, 100000, file));
+    while (fgets(buffer, 100000, file) != NULL){
+        int x=0;
         char * start = buffer;
-        while ("true") {
-            values[y * sizeX + x] = atof(start);
-            start = strchr(start, ',');
+        while (true) {
+            values[y*colonnes + x]= atof(start);
+            start=strchr(start, ',');
             if (start == NULL) break;
-            start += 1;
-
-            x += 1;
-            if (x >= sizeX) break;
-        }
-
-        y += 1;
-        if (y >= sizeY) break;
+            start+=1;
+            x+=1;
+            if (x>= colonnes) break;
+        } 
+        y+=1;
+        if (y>= lignes) break;
     }
-
     fclose(file);
-    return "true";
+    return true;
 }
 
-double CalculVolumeInitial(int longueur, int largeur, double pente, int epaisseur){
+double VolumeInitial(int longueur, int largeur, double pente, int epaisseur){
 	double alpha = atan(pente/100);
 	double longueurglace = longueur/cos(alpha);
 	double volume = longueurglace * epaisseur * largeur;
 	return volume;
 }
 
-double CalculMasseInitiale(int longueur, int largeur, double pente, int epaisseur){
+double MasseInitiale(int longueur, int largeur, double pente, int epaisseur){
 	double massevolumique = 917;
-	return massevolumique*CalculVolumeInitial(longueur, largeur, pente, epaisseur);
+	return massevolumique*VolumeInitial(longueur, largeur, pente, epaisseur);
 }
 
-double CalculVolumeFinal(double tableau[], int longueur){
+double VolumeFinal(double tableau[], int longueur, int largeur, double pente, int epaisseur){
 	double resultat = 0.0;
 	for (int i = 0; i<longueur; i++){
-		double x = tableau[4*3000+i];
-		resultat += x*300;
-		printf("%f\n", x);
+		double x = tableau[3*3000+i];
+		resultat += x*largeur;
 	}
-	return resultat;
+	return VolumeInitial(longueur, largeur, pente, epaisseur)-resultat;
 }
 
-double CalculMasseFinale(){
-
-	
-	return 0;
+double MasseFinale(double tableau[], int longueur, int largeur, double pente, int epaisseur){
+	double massevolumique = 917;
+	return massevolumique*VolumeFinal(tableau, longueur, largeur, pente, epaisseur);
 }
 
 void Fichiercsv(char * fichier, double tableau[]){
 	FILE * file = fopen(fichier, "w+");
-		for (int y = 0; y < 5; y++){
+		for (int y = 0; y < 4; y++){
 			for (int x = 0; x < 3000; x++){
-				int p = tableau[y*2+x];
+				double p = tableau[y*3000+x];
 				if (x > 0) fprintf(file, ", ");
-					fprintf(file, "%d", p);
+					fprintf(file, "%f", p);
 			}
 			fprintf(file, "\n");
 		}
@@ -75,19 +71,28 @@ void Fichiercsv(char * fichier, double tableau[]){
 }
 
 int main(int argc, char * argv[]){
-	double * Valeursdiff = malloc(5 * 3000 * sizeof (double));
-    readCsv("donnees_fonte.csv", Valeursdiff, 5, 3000);
-    
-    Fichiercsv("Valeursdiff.csv", Valeursdiff);
-    
-    double Vf = CalculVolumeFinal(Valeursdiff, 1500);
-	printf("le volume final du glacier est de %0.2e m^3\n", Vf);
+	double * Valeursdiff = malloc(4 * 3000 * sizeof (double));
+    lire_donnees_csv("donnees_fonte.csv", Valeursdiff, 3000, 4);
+    int L = 2500;
+    int Larg = 300;
+    int P = 20;
+    int H = 200;
+
+	double V = VolumeInitial(L, Larg, P, H);
 	
-	double V = CalculVolumeInitial(1500, 300, 20, 200);
-	printf("le volume initial du glacier est de %0.2e m^3\n", V); 
+	double M = MasseInitiale(L, Larg, P, H);
+
+	double Vf = VolumeFinal(Valeursdiff, L, Larg, P, H);
 	
-	double M = CalculMasseInitiale(1500, 300, 20, 200);
-	printf("la masse initiale du glacier est de %0.2e Kg\n", M);
+	double Mf = MasseFinale(Valeursdiff, L, Larg, P, H);
+	
+	double pourcentageV = Vf/V;
+	double pourcentageM = Mf/M;
+	
+	printf("le volume du glacier diminue de'%.3e'm^3 a '%.3e'm^3, ce qui correspond a une baisse de %f%c sur 5 annees\n", V, Vf, pourcentageV, 37);
+	printf("la masse totale du glacier diminue de '%0.3e'Kg3 a '%0.3e'Kg, ce qui correspond a une baisse de %f%c sur 5 annees\n", M, Mf, pourcentageM, 37);
+	
+	Fichiercsv("Valeursdiff.csv", Valeursdiff);
 	
 	free(Valeursdiff);
 	return 0;
