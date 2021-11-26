@@ -20,13 +20,11 @@ def telecharger(dossier):
             {'temperature': donnees_initiales.get("history_1h").get("temperature")})
     return donnees_utiles
 
-
 Calculalt = telecharger(fichiers[0])
 
 donnees_finales = {'time': []}
 donnees_finales.update({'precipitation': []})
 donnees_finales.update({'temperature': []})
-
 
 def dictionnaire(dossier):
     # changement d'unite temporelle, passer d'heures en jour, et du coup ne garder que la date
@@ -47,7 +45,6 @@ def dictionnaire(dossier):
             somme += doss["temperature"][j]
             donnees_finales["temperature"].append(somme/24)
     return donnees_finales
-
 
 for i in range(len(fichiers)):
     dictionnaire(fichiers[i])
@@ -355,6 +352,15 @@ with open('donnees_fonte.csv', 'w') as csv_file:
     writer.writerow(E)#hauteur de neige et glace après temps t
     writer.writerow(liste_diffinal)#différance hauteur entre temps t0 et temps t
 
+#convertir le dictionnaire python en fichier csv
+#header du fichier csv (nom de chaque colonnes)
+csv_columns= ['precipitation', 'temperature']
+#lignes du ficher: date, precipitation e temperature moyenne par jour
+dict_data = []
+for i in range(len(donnees_finales["temperature"])):
+    dict_data.append([donnees_finales["precipitation"][i], donnees_finales["temperature"][i]])
+    
 with open('donnees_finales.csv', 'w') as csv_file:
     writer = csv.writer(csv_file)
-    writer.writerow(donnees_finales)
+    writer.writerow(csv_columns)
+    writer.writerows(dict_data)

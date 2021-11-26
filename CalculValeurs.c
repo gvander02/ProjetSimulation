@@ -73,7 +73,7 @@ void Fichiercsv(char * fichier, double tableau[]){
 int main(int argc, char * argv[]){
 	double * Valeursdiff = malloc(4 * 3000 * sizeof (double));
     lire_donnees_csv("donnees_fonte.csv", Valeursdiff, 3000, 4);
-    int L = 2500;
+    int L = 2700;
     int Larg = 300;
     int P = 20;
     int H = 200;
