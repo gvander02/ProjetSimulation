@@ -36,7 +36,7 @@ _Bool lire_donnees_csv(char * nom_csv, double * values, int colonnes, int lignes
 // calcul du débit pour chaque position x,y, sachant que nous considérons que 
 //l'altitude pour chaque couple (x,y) est la même, (1500 correspond a la 
 //longueur du glacier choisie dans le code python)
-double debit(double * differences, int largeur, int longueur){ //y est la largeur de notre echantillon de glacier
+double debit(double * differences, int largeur, int longueur){
     double debit_total = 0.0;
     for(int i=0; i<longueur; i++){
         double diff = 0; 
@@ -47,7 +47,6 @@ double debit(double * differences, int largeur, int longueur){ //y est la largeu
 }
 
 // scenario 1: effet d'un changement de temperature sur chaque jours
-
 // fonction qui fait un changement de la temperature d'une valeur aleatoire entre -1 et 3 par jour
 _Bool scenario_temp(double * values, double * temperature_scenario){
     srand(time(NULL));
@@ -55,7 +54,6 @@ _Bool scenario_temp(double * values, double * temperature_scenario){
         double randDomain = RAND_MAX + 1.0;
         int ajout = (int) (rand() / randDomain * 5 - 1);
         temperature_scenario[i] = values[2*i+1] + 273.0 + ajout;
-        printf("%f, ", temperature_scenario[i]);
     }
     return true;
 }
@@ -63,7 +61,7 @@ _Bool scenario_temp(double * values, double * temperature_scenario){
 // donc on prend les valeurs de la hauteur calculee dans le code python 
 // auquel on applique le modele de fonte pour calculer la hauteur finale
 // calcul de la fonte avec les nouvelles valeurs de la temperature
-_Bool modele_fonte(double * hauteur, double * hauteur_fonte, double * temperature, int time, int longueur, double pente){
+_Bool modele_fonte(double * hauteur, double * temperature, int time, int longueur, double pente){
     double Tr = 273.0; //temperature de la roche
     double Dt = 2.215; // diffusion thermique 
     double p = 900.0; // masse volumnique glace
@@ -72,12 +70,11 @@ _Bool modele_fonte(double * hauteur, double * hauteur_fonte, double * temperatur
     for (int i = 0; i<366*5; i++){
         for (int j = 0; j<longueur; j++){
             temperature_h[j]=temperature[i]+(6.5*pente*j)/1000;
-            if (temperature[j]>Tr){
+            if (temperature_h[j]>Tr){
                 double diff= hauteur[j]*hauteur[j]-(2*Dt*(temperature_h[j]-Tr)*3600*24)/(p*cl);
                 double fonte = sqrt(diff);
-                hauteur_fonte[j]=fonte;
+                hauteur[j]=fonte;
             }
-            else hauteur_fonte[j]=hauteur[j];
         }
     }
     return true;
@@ -107,12 +104,9 @@ int main(){
     lire_donnees_csv("donnees_fonte.csv", calculs, L, 4);
 
     // creer un tableau avec les donnees meteoblue
-    double values[2*366];
-    lire_donnees_csv("donnees_finales.csv", values, 2, 366);
+    double values[2*5*366];
+    lire_donnees_csv("donnees_finales.csv", values, 2, 5*366);
     printf("donnees finales:\n");
-    //for (int i=2; i<2*366; i++){
-    //   printf("%f\n", values[i]);
-    //}
     
     double * difference = calloc(L, sizeof(double));
     
@@ -129,16 +123,17 @@ int main(){
     
     // faire un tableau avec la hauteur initiale 
     double hauteur[L];
+    double Hauteur[L];
     for(int i=0;i<L;i++){
         hauteur[i]=calculs[1*L+i];
+		Hauteur[i]=calculs[1*L+i];
     }
     
     // calculer la hauteur apres avoir applique le modele de fonte
-    double hauteur_fonte[L];
-    modele_fonte(hauteur, hauteur_fonte, temperature_scenario, 366, L, P);
-    //for(int i=0; i<L; i++){
-    //    printf("%f\n", hauteur[i]-hauteur_fonte[i]);
-    //}
+    modele_fonte(hauteur, temperature_scenario, 5*366, L, P);
+    for(int i=0; i<L; i++){
+        printf("%f\n", Hauteur[i] - hauteur[i]);
+    }
     
     Fichiercsv("calculsdiff.csv", calculs);
     free(calculs);

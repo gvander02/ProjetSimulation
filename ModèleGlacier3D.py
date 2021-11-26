@@ -59,8 +59,9 @@ tps = 1825#len()  # float(input("Temps de la simulation (en jour)"))
 # on suppose que le point des données est le sommet du glacier
 Alt = Calculalt["altitude"]
 alpha = P*100*math.pi/180  # radians
-BaseG = Alt - (P*L)
-BaseR = Alt - (P*(L+400)+H)
+BaseG = Alt - P*L
+BaseR = Alt - P*(L+400) - H
+BaseG2 = Alt - P*L - H
 # Constantes
 Patm = ...
 V = 10/365  # m/jour
@@ -117,11 +118,9 @@ for i in range(len(Zg[1])):
 xx = np.linspace(0, L, L)
 yy = np.linspace(0, H, H)
 
-
 def vitesse(y):
     v = V + b*y*(2*H-y)*3600*24
     return v
-
 
 W = [0]
 for i in range(L-2):
@@ -134,6 +133,17 @@ for i in range(H):
     vv.append(vitesse(i))
 vv = np.array(vv)
 
+vv1 = []
+for i in range(H):
+    vv1.append(vitesse(H-i))
+vv1 = np.array(vv1)
+
+deplacement1 = []
+for i in range(H-1):
+    deplacement1.append(L + tps*vv1[i])
+deplacement1.append(L)
+dep1 = np.array(deplacement1)
+
 deplacement = []
 for i in range(H-1):
     deplacement.append(L + tps*vv[i])
@@ -144,19 +154,24 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set_aspect('equal', adjustable='box')
 ax.set_ylim(0, H + 100)
-plt.plot(xx, w, label="Glacier à plat")
-plt.plot(dep, yy, label=f"Glacier après {tps} jours")
+plt.plot(xx, w, label="Glacier à plat", color = 'lightblue')
+plt.plot(dep, yy, label=f"Glacier après {tps} jours sans effondrement", color = 'green')
+plt.plot(dep1, yy, label=f"Glacier après {tps} jours et après effondrement", color = 'red')
 plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
 plt.legend()
 
 
-#Modele d'enneigement---------------------------------------------------//
+#Modele d'enneigement, Accumulation---------------------------------------------------//
 Coeff = 0.00005  # coeff d'enneigement par rapport à l'altitude
 dp = int(dep[-2])
+dp1 = int(dep1[-2])
 del deplacement[-1]
-BaseGfinal = BaseG - P*(dep[-2]-L)
-BaseRfinal = BaseR - P*(dep[0]-L)
+del deplacement[-1]
+del deplacement[-1]
+del deplacement1[-1]
+BaseGfinal = BaseG - P*(dep1[-1]-L)
+BaseRfinal = BaseR - P*(dep1[0]-L)
 """
 valeurs enneigement par jour:
 la hauteur de neige qui tombe a un coefficient de 10 par rapport à la précipitation(eau)
@@ -223,7 +238,10 @@ neige(tps)
 #Graphique 2D----------------------------------------------------------------//
 x = np.linspace(0, L, L)
 xxx = np.linspace(0, dp, dp)
-yyy = np.linspace(BaseRfinal, BaseGfinal, H)
+xxx1 = np.linspace(0, dp1, dp1)
+xxx2 = np.linspace(L, dp, dp)
+yyy = np.linspace(BaseRfinal, BaseGfinal-3, H-3)
+
 # niveau du sol y
 y = P*L-P*xxx + BaseR
 
@@ -235,10 +253,13 @@ Z.append(BaseR)
 
 # niveau de la neige
 Varneige = []
+VraiZ =[]
 for i in range(L):
-    Varneige.append(E[i]+Z[i])
+    VraiZ.append(P*L-P*i + BaseG)
+for i in range(L):
+    Varneige.append(E[i]+VraiZ[i])
 
-# Modele de fonte------------------------------------------------------------//
+# Modele de fonte, Ablation------------------------------------------------------------//
 htt = []
 for i in range(L):
     htt.append(BaseG + P*L - P*i)
@@ -252,23 +273,28 @@ for i in range(tps):
             htt.insert(j, fonte)
 
 Pentefinal = (htt[0]-htt[-1])/L
+Xmin = int(V*tps)
 Xmax = int(dep[-2]-L)
 
 ht = [Z[0]]
 for i in range(1,L):
-    total = htt[i]+Varneige[i]-Z[i]
-    ht.append(total)
+    ht.append(htt[i]+E[i])
 dernier_point = ht[-1]
-for i in range(1,Xmax+1):
+for i in range(1,Xmin+2):
     ht.append(dernier_point - Pentefinal*i)
     
-deplacement.append(deplacement[-1]-(1/Pentefinal))
+deped = []
+for i in range(1,Xmax+1):
+    deped.append(dernier_point - Pentefinal*i)
 
 h = np.array(ht)
 e = np.array(Varneige)
 z = np.array(Z)
 dep2 = np.array(deplacement)
+dep1 = np.array(deplacement1)
 
+
+yyy1 = np.linspace(BaseRfinal, int(ht[-1])-1, H-1)
 # taille égale des axes
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -276,8 +302,10 @@ ax.set_aspect('equal', adjustable='box')
 plt.plot(x, e, label="Enneigement", color='darkblue')
 plt.plot(x, z, label="Glacier au temps t0", color='lightblue')
 plt.plot(xxx, y, label="Roche", color="black")
-plt.plot(xxx, h, label="Glacier au temps t", color="red")
-plt.plot(dep2, yyy, color="red")
+plt.plot(xxx1, h, label="Glacier au temps t", color="red")
+plt.plot(xxx2, deped, color = 'green')
+plt.plot(dep2, yyy, color="green")
+plt.plot(dep1, yyy1, color="red")
 plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
 plt.legend()
@@ -297,19 +325,17 @@ for i in range(distance):
     Zgt[0][i] = Zr[0][i]
     Zgt[-1][i] = Zr[0][i]
 
-
 ZgT2 = []
 for i in range(Larg):
     ZgT2.append(deplacement)
 Zgt2 = np.array(ZgT2)
-
 
 xxx2 = np.linspace(100, Larg+100, Larg)
 xxx1 = np.linspace(0, dp, dp)
 XXX1, XXX2 = np.meshgrid(xxx1, xxx2)
 
 yyy1 = np.linspace(100, Larg+100, Larg)
-yyy2 = np.linspace(BaseRfinal, BaseGfinal, H)
+yyy2 = np.linspace(BaseG - H, BaseGfinal-3, H-3)
 YYY1, YYY2 = np.meshgrid(yyy2, yyy1)
 
 
@@ -336,7 +362,7 @@ for i in range(L):
     if Z[i]<Varneige[i]:
         diff = Varneige[i] - ht[i]
     else:
-        diff = Z[i] -ht[i]
+        diff = Z[i] - ht[i]
     liste_difference.append(diff)
     
 del liste_difference[0]
