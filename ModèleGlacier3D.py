@@ -4,10 +4,8 @@ import math
 import json
 import csv
 
-fichiers = ["aletsch2016.json", "aletsch2017.json",
-            "aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
+fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
 # recuperer les donnees necessaires a notre simulation du fichier meteoblue json
-
 
 def telecharger(dossier):
     with open(dossier, "r") as donnees_initiales:
