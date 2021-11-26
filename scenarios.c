@@ -6,11 +6,11 @@
 #include <time.h>
 
 // lire les donnees du fichier csv (jour, precipitation, temperature), et les mettre dans un tableau malloc
-bool lire_donnees_csv(char * nom_csv, double * values, int colonnes, int lignes){
+void lire_donnees_csv(char * nom_csv, double * values, int colonnes, int lignes){
     FILE * file = fopen(nom_csv, "r");
     if (file == NULL){
         fprintf(stderr, "File %s not found.\n", nom_csv);
-        return false;
+        //return false;
     }
     int y = 0;
     char buffer[100000];
@@ -30,7 +30,7 @@ bool lire_donnees_csv(char * nom_csv, double * values, int colonnes, int lignes)
         if (y>= lignes) break;
     }
     fclose(file);
-    return true;
+    //return true;
 }
 
 // calcul du débit pour chaque position x,y, sachant que nous considérons que 
@@ -85,9 +85,39 @@ bool modele_fonte(double * hauteur, double *hauteur_fonte, double * temperature,
 
 }
 
+_Bool readCsv(char * filename, double * values, int sizeX, int sizeY) {
+    FILE * file = fopen(filename, "r");
+    if (file == NULL) {
+        fprintf(stderr, "File %s not found.", filename);
+		return "false";
+    }
+
+    int y = 0;
+    char buffer[1000000];
+    while (fgets(buffer, 1000000, file) != NULL) {
+        int x = 0;
+        char * start = buffer;
+        while ("true") {
+            values[y * sizeX + x] = atof(start);
+            start = strchr(start, ',');
+            if (start == NULL) break;
+            start += 1;
+
+            x += 1;
+            if (x >= sizeX) break;
+        }
+
+        y += 1;
+        if (y >= sizeY) break;
+    }
+
+    fclose(file);
+    return "true";
+}
+
 int main(){
-    double * calculs = calloc(6000, sizeof (double));
-    lire_donnees_csv("donnees_fonte.csv", calculs, 1500, 4);
+    double * calculs = calloc(9000, sizeof (double));
+    readCsv("donnees_fonte.csv", calculs, 4, 1500);
     // faire un tableau avec le calcul des differences
     // for(int i=0; i<6000; i++){
     //     printf("%f ,", calculs[i]);
@@ -99,6 +129,10 @@ int main(){
     // for (int i=0; i<3*366; i++) {
     //     printf("%f, ", values[i]);
     // }
+    double * difference= calloc(1500, sizeof(double));
+    for(int i=0; i<10; i++){
+        printf("%f\n", calculs[i]);
+    }
     // somme des diff et diviser par nb de jours donne la moyenne
     float moyenne_debit_jours = debit(calculs,300)/366;
     printf("le débit moyen par jour est de: %f m3\n",moyenne_debit_jours);
