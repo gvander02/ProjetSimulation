@@ -63,7 +63,7 @@ bool scenario_temp(double *values, double *temperature_scenario){
 // donc on prend les valeurs de la hauteur calculee dans le code python 
 // auquel on applique le modele de fonte pour calculer la hauteur finale
 // calcul de la fonte avec les nouvelles valeurs de la temperature
-bool modele_fonte(double * hauteur, double * temperature, int time){
+bool modele_fonte(double * hauteur, double *hauteur_fonte, double * temperature, int time){
     double Tr = 273.0; //temperature de la roche
     double Dt = 2.215; // diffusion thermique 
     double p = 900.0; // masse volumnique glace
@@ -76,9 +76,9 @@ bool modele_fonte(double * hauteur, double * temperature, int time){
             if (temperature[j]>Tr){
                 double diff= hauteur[j]*hauteur[j]-(2*Dt*(temperature_h[j]-Tr)*3600*24)/(p*cl);
                 double fonte = sqrt(diff);
-                hauteur[j]=fonte;
+                hauteur_fonte[j]=fonte;
             }
-            else hauteur[j]=hauteur[j];
+            else hauteur_fonte[j]=hauteur[j];
         }
     }
     return true;
@@ -113,8 +113,9 @@ int main(){
         hauteur[i]=calculs[1*1500+i];
     }
     // calculer la hauteur apres avoir applique le modele de fonte
-    modele_fonte(hauteur, temperature_scenario, 366);
+    double hauteur_fonte[1500];
+    modele_fonte(hauteur, hauteur_fonte, temperature_scenario, 366);
     for(int i=0; i<1500; i++){
-        printf("%f ,", hauteur[i]);
+        printf("%f ,", hauteur[i]-hauteur_fonte[i]);
     }
 }
