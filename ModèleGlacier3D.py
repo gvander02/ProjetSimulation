@@ -4,8 +4,9 @@ import math
 import json
 import csv
 
-fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
 # recuperer les donnees necessaires a notre simulation du fichier meteoblue json
+
+fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
 
 def telecharger(dossier):
     with open(dossier, "r") as donnees_initiales:
@@ -27,11 +28,11 @@ donnees_finales.update({'precipitation': []})
 donnees_finales.update({'temperature': []})
 
 def dictionnaire(dossier):
-    # changement d'unite temporelle, passer d'heures en jour, et du coup ne garder que la date
+    # changement d'unite temporelle, passer d'heures en jour, garder que la date
     # for i in range(0, len(telecharger(dossier)["time"]), 24):
     #    donnees_finales['time'].append(telecharger(dossier)["time"][i][:10])
     doss = telecharger(dossier)
-    # faire la somme des precipitations par jours
+    # Somme des precipitations par jours
     for i in range(0, len(doss["precipitation"]), 24):
         somme = 0
         for j in range(i, i+24):
@@ -155,7 +156,7 @@ ax = fig.add_subplot(111)
 ax.set_aspect('equal', adjustable='box')
 ax.set_ylim(0, H + 100)
 plt.plot(xx, w, label="Glacier à plat", color = 'lightblue')
-plt.plot(dep, yy, label=f"Glacier après {tps} jours sans effondrement", color = 'green')
+plt.plot(dep, yy, ':', label=f"Glacier après {tps} jours sans effondrement", color = 'green')
 plt.plot(dep1, yy, label=f"Glacier après {tps} jours et après effondrement", color = 'red')
 plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
@@ -163,12 +164,12 @@ plt.legend()
 
 
 #Modele d'enneigement, Accumulation---------------------------------------------------//
-Coeff = 0.00005  # coeff d'enneigement par rapport à l'altitude
+Coeff = 0.00005  # coeff d'enneigement par rapport à l'altitude (plus réaliste)
 dp = int(dep[-2])
 dp1 = int(dep1[-2])
 del deplacement[-1]
-del deplacement[-1]
-del deplacement[-1]
+#del deplacement[-1]
+#del deplacement[-1]
 del deplacement1[-1]
 BaseGfinal = BaseG - P*(dep1[-1]-L)
 BaseRfinal = BaseR - P*(dep1[0]-L)
@@ -239,8 +240,7 @@ neige(tps)
 x = np.linspace(0, L, L)
 xxx = np.linspace(0, dp, dp)
 xxx1 = np.linspace(0, dp1, dp1)
-xxx2 = np.linspace(L, dp, dp)
-yyy = np.linspace(BaseRfinal, BaseGfinal-3, H-3)
+
 
 # niveau du sol y
 y = P*L-P*xxx + BaseR
@@ -260,9 +260,9 @@ for i in range(L):
     Varneige.append(E[i]+VraiZ[i])
 
 # Modele de fonte, Ablation------------------------------------------------------------//
-htt = []
-for i in range(L):
-    htt.append(BaseG + P*L - P*i)
+htt = VraiZ
+#for i in range(L):
+#    htt.append(BaseG + P*L - P*i)
 
 for i in range(tps):
     for j in range(L):
@@ -277,15 +277,18 @@ Xmin = int(V*tps)
 Xmax = int(dep[-2]-L)
 
 ht = [Z[0]]
+HT = []
 for i in range(1,L):
     ht.append(htt[i]+E[i])
+for i in range(L):
+    HT.append(htt[i]+E[i])
 dernier_point = ht[-1]
 for i in range(1,Xmin+2):
     ht.append(dernier_point - Pentefinal*i)
     
-deped = []
+pente_v = []
 for i in range(1,Xmax+1):
-    deped.append(dernier_point - Pentefinal*i)
+    pente_v.append(dernier_point - Pentefinal*i)
 
 h = np.array(ht)
 e = np.array(Varneige)
@@ -293,8 +296,11 @@ z = np.array(Z)
 dep2 = np.array(deplacement)
 dep1 = np.array(deplacement1)
 
-
+haut = int(math.sin(alpha)*V*tps/2)
+yyy = np.linspace(BaseR-haut, pente_v[-1], H-1)
 yyy1 = np.linspace(BaseRfinal, int(ht[-1])-1, H-1)
+xxx2 = np.linspace(L, dp, Xmax)
+
 # taille égale des axes
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -303,9 +309,9 @@ plt.plot(x, e, label="Enneigement", color='darkblue')
 plt.plot(x, z, label="Glacier au temps t0", color='lightblue')
 plt.plot(xxx, y, label="Roche", color="black")
 plt.plot(xxx1, h, label="Glacier au temps t", color="red")
-plt.plot(xxx2, deped, color = 'green')
-plt.plot(dep2, yyy, color="green")
 plt.plot(dep1, yyy1, color="red")
+plt.plot(dep2, yyy, ':', label = f'glacier après {tps} jours', color="green")
+plt.plot(xxx2, pente_v, ':', color = 'green')
 plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
 plt.legend()
@@ -327,15 +333,15 @@ for i in range(distance):
 
 ZgT2 = []
 for i in range(Larg):
-    ZgT2.append(deplacement)
+    ZgT2.append(deplacement1)
 Zgt2 = np.array(ZgT2)
 
 xxx2 = np.linspace(100, Larg+100, Larg)
-xxx1 = np.linspace(0, dp, dp)
+xxx1 = np.linspace(0, dp1, dp1)
 XXX1, XXX2 = np.meshgrid(xxx1, xxx2)
 
 yyy1 = np.linspace(100, Larg+100, Larg)
-yyy2 = np.linspace(BaseG - H, BaseGfinal-3, H-3)
+yyy2 = np.linspace(BaseG2-haut, pente_v[-1], H-1)
 YYY1, YYY2 = np.meshgrid(yyy2, yyy1)
 
 
@@ -356,27 +362,22 @@ plt.show()
 liste_difference = []
 liste_diffinal = []
 for i in range(L):
-    diffinal = Z[i] - ht[i]
+    diffinal = VraiZ[i] - HT[i]
     liste_diffinal.append(diffinal)
     
     if Z[i]<Varneige[i]:
-        diff = Varneige[i] - ht[i]
+        diff = Varneige[i] - HT[i]
     else:
-        diff = Z[i] - ht[i]
+        diff = VraiZ[i] - ht[i]
     liste_difference.append(diff)
     
-del liste_difference[0]
-del liste_difference[-1]
-del liste_diffinal[0]
-del liste_diffinal[-1]
-del Z[0]
-del Z[-1]
 with open('donnees_fonte.csv', 'w') as csv_file:
     writer = csv.writer(csv_file)
-    writer.writerow(liste_difference)#Valeurs de ce qui a fondu
-    writer.writerow(Z)#hauteur du glacier au temps t0
-    writer.writerow(E)#hauteur de neige et glace après temps t
     writer.writerow(liste_diffinal)#différance hauteur entre temps t0 et temps t
+    writer.writerow(VraiZ)#hauteur du glacier au temps t0
+    writer.writerow(E)#hauteur de neige et glace après temps t
+    writer.writerow(liste_difference)#Valeurs de ce qui a fondu
+
 
 #convertir le dictionnaire python en fichier csv
 #header du fichier csv (nom de chaque colonnes)
