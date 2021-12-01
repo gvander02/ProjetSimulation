@@ -107,12 +107,12 @@ int main(){
     lire_donnees_csv("donnees_fonte.csv", calculs, L, 4);
 
     // creer un tableau avec les donnees meteoblue
-    double values[2*366];
-    lire_donnees_csv("donnees_finales.csv", values, 2, 366);
+    double values[2*5*366];
+    lire_donnees_csv("donnees_finales.csv", values, 2, 5*366);
     printf("donnees finales:\n");
-    //for (int i=2; i<2*366; i++){
-    //   printf("%f\n", values[i]);
-    //}
+    for (int i=2; i<2*366; i++){
+      printf("%f\n", values[i]);
+    }
     
     double * difference = calloc(L, sizeof(double));
     
