@@ -33,15 +33,15 @@ _Bool lire_donnees_csv(char * nom_csv, double * values, int colonnes, int lignes
     return true;
 }
 
-double debit(double differences[], int largeur, int l_incr){
+double debit(double differences[], int largeur, int l_incr, int longueur){
     // calcul du débit pour chaque position x,y, sachant que nous considérons que 
 	//l'altitude pour chaque couple (x,y) est la même, (L correspond a la 
 	//longueur du glacier choisie dans le code python)
     double debit_total = 0.0;
     for(int i=0; i<l_incr; i++){
         double diff = 0; 
-        diff = differences[3*l_incr + i]*largeur;
-        printf("%f, ", diff);
+        diff = differences[3*l_incr + i]*largeur*longueur/l_incr;
+        //printf("%f, ", diff);
         debit_total += diff;
     } 
     return debit_total;
@@ -110,7 +110,7 @@ double VolumeFinal(double tableau[], int l_incr, int longueur, int largeur, doub
 	double resultat = 0.0;
 	for (int i = 0; i<l_incr; i++){
 		double x = tableau[i];
-		resultat += x*largeur;
+		resultat += x*largeur*longueur/l_incr;
 	}
 	return VolumeInitial(longueur, largeur, pente, epaisseur)-resultat;
 }
@@ -158,7 +158,7 @@ int main(){
 	printf("la masse totale du glacier diminue de: %0.3eKg3, a: %0.3eKg, ce qui correspond a une baisse de: %f%c sur 5 annees.\n\n", M, Mf, pourcentageM, 37);
     
     // somme des diff et diviser par nb de jours donne la moyenne
-    float moyenne_debit_jours = debit(Valeursdiff, Larg, L_incr)/(5*366);
+    float moyenne_debit_jours = debit(Valeursdiff, Larg, L_incr, L)/(5*366);
     printf("Le debit moyen par jour est de: %0.2f m^3, ",moyenne_debit_jours);
     
     double temperature_scenario[5*366];
