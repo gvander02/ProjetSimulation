@@ -204,7 +204,7 @@ for i in range(L_incr):
 for i in range(tps):
     for j in range(L_incr):
         if Ts[i][j] > Tr:
-            hauteur = htt[j]**(2) - 5000*(2*Ct*(Ts[i][j]-Tr)*3600*24)/(p*CL)
+            hauteur = htt[j]**(2) - (2*Ct*(Ts[i][j]-Tr)*3600*24)/(p*CL)
             fonte = hauteur**(1/2)
             del htt[j]
             htt.insert(j, fonte)
