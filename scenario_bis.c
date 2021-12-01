@@ -60,14 +60,49 @@ double scenario_debit(int l_incr, int largeur, double * Hauteur, double * hauteu
 }
 
 _Bool scenario_temp(double * values, double * temperature_scenario){
-    // scenario 1: effet d'un changement de temperature sur chaque jours
-	// fonction qui fait un changement de la temperature d'une valeur aleatoire entre -1 et 3 par jour
+    //scenario 1: effet d'un changement de temperature sur chaque jours
+    //selon des articles les vagues de chaleures seront plus intense et plus longues.
+	//fonction qui fait un changement de la temperature d'une valeur aleatoire entre -1 et +3 par jour
     srand(time(NULL));
     for(int i = 0; i<5*366; i++){
         double randDomain = RAND_MAX + 1.0;
         int ajout = (int) (rand() / randDomain * 5 - 1);
         temperature_scenario[i] = values[2*i+1] + 273.0 + ajout;
+	}
+	return true;
+}
+
+_Bool scenario_temp2(double * temperature_scenario){
+	//on considere une vague de chaleur à partir de 0 degré pour une altitude a plus de 3600m
+	//pour pas avoir des mesures exagérées nous faisons deux niveau de vague de chaleur
+	srand(time(NULL));
+	int temps = 5*366;
+	while (temps > 1){	
+		double randDomain = RAND_MAX + 1.0;
+        int ajout = (int) (rand() / randDomain * 5 - 1);
+		if (temperature_scenario[5*366-temps] > 273 && temperature_scenario[5*366-temps] < 276){
+			for (int j = 0; j<10; j++){
+				if (temperature_scenario[5*366-temps+j]<273){ 
+					temperature_scenario[5*366-temps+j] = temperature_scenario[5*366-temps] + ajout;
+				}else{ 
+					temperature_scenario[5*366-temps+j] = temperature_scenario[5*366-temps+j] + ajout;
+				}
+			}
+        }
+        temps -= 10;
+        if (temperature_scenario[5*366-temps] > 276){
+			for (int j = 0; j<10; j++){
+				if (temperature_scenario[5*366-temps+j]<276){ 
+					temperature_scenario[5*366-temps+j] = temperature_scenario[5*366-temps] + ajout;
+				}else{ 
+					temperature_scenario[5*366-temps+j] = temperature_scenario[5*366-temps+j] + ajout;
+				}
+			}
+			temps -= 10;
+        }
+        temps -= 1;
     }
+    
     return true;
 }
 
@@ -163,6 +198,7 @@ int main(){
     
     double temperature_scenario[5*366];
     scenario_temp(values, temperature_scenario);
+    scenario_temp2(temperature_scenario);
     
     // faire un tableau avec la hauteur initiale et l'enneigement
     double Variation_neige[L_incr];
@@ -193,7 +229,7 @@ int main(){
     printf("Le volume final, avec le scenario augementant la temperature de maximum 3 degrees, est de: %0.3em^3, il y a donc une diminution de %f%c.", VolumeFinal_scen, pourcentageVs, 37);
     printf(" Soit %0.2fm^3 de moins que selon notre modele de base\n", Vfs);
     
-    Fichiercsv("Vale.csv", difference_scen, L_incr, 4);
+    Fichiercsv("Vale.csv", temperature_scenario, 5*366, 1);
 	free(Valeursdiff);
     
     return 0;

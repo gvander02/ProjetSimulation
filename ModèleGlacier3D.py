@@ -36,14 +36,14 @@ def dictionnaire(dossier):
         somme = 0
         for j in range(i, i+24):
             somme += doss["precipitation"][j]
-            donnees_finales["precipitation"].append(somme)
+        donnees_finales["precipitation"].append(somme)
 
     # moyenne des temperatures par jours
     for i in range(0, len(doss["temperature"]), 24):
         somme = 0
         for j in range(i, i+24):
             somme += doss["temperature"][j]
-            donnees_finales["temperature"].append(somme/24)
+        donnees_finales["temperature"].append(somme/24)
     return donnees_finales
 
 for i in range(len(fichiers)):
@@ -198,7 +198,7 @@ for i in range(L_incr):
     VraiZ.append(P*L-P*i*delta + BaseG)
 for i in range(L_incr):
     Varneige.append(E[i]+VraiZ[i])
-    htt.append(E[i]+VraiZ[i])
+    htt.append(E[i]+H)
 
 # Modele de fonte, Ablation------------------------------------------------------------//    
 for i in range(tps):
@@ -208,6 +208,9 @@ for i in range(tps):
             fonte = hauteur**(1/2)
             del htt[j]
             htt.insert(j, fonte)
+
+for i in range(L_incr):
+    htt[i] = htt[i] - H + VraiZ[i]
 
 Pentefinal = (htt[-2]-htt[-1])/delta
 PenteF = math.atan(Pentefinal) # en radians
