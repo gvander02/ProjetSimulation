@@ -171,6 +171,18 @@ void Fichiercsv(char * fichier, double tableau[], int colonnes, int lignes){
 	fclose(file);
 }
 
+double niveau_lac(int jours, double debit, double surface, double niveau_i){
+    // evolution par jour du niveau du lac
+    // nous avons mis des dimensions au hazard
+    double niveau = niveau_i;
+    double affluent = debit/(3600*24);
+    for(int i=0; i<5*366; i++){
+        double effluent = pow(niveau-15.01,2)*250*3600*24; //m^3/j
+        double diff_vol = (affluent-effluent);
+        niveau = niveau + diff_vol/surface;
+    }
+}
+
 int main(){
 	int L = 20000;
 	int L_incr = 2000;
