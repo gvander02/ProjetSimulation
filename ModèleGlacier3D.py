@@ -1,3 +1,17 @@
+'''
+Un glacier est une accumulation de glace le long d'une vallée.
+Il se forme grâce aux couches de neige qui viennent se superposer.
+Écrasée sous son propre poids, la neige se compact et rejete les substances gazeuses.
+Ainsi, elle se soude en une masse dense et homogène pour se transformer en glace.
+
+Les glaciers sont des reserves primordiales en eau douce. De nos jours, ils sont le sujet de nombreuses discussions.
+C'est pourquoi, nous avons décidé de vérifier, à l'aide de nos connaissances en informatique, comment et à quelle vitesse
+le plus grand glacier des alpes devrait fondre...
+
+Nous voulons aussi que ce code soit les plus facilement modifiable pour s'appliquer sur d'autre glacier avec des données météo
+et des tailles différentes.
+'''
+
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -27,9 +41,6 @@ donnees_finales.update({'precipitation': []})
 donnees_finales.update({'temperature': []})
 
 def dictionnaire(dossier):
-    # changement d'unite temporelle, passer d'heures en jour, garder que la date
-    # for i in range(0, len(telecharger(dossier)["time"]), 24):
-    #    donnees_finales['time'].append(telecharger(dossier)["time"][i][:10])
     doss = telecharger(dossier)
     # Somme des precipitations par jours
     for i in range(0, len(doss["precipitation"]), 24):
@@ -37,8 +48,7 @@ def dictionnaire(dossier):
         for j in range(i, i+24):
             somme += doss["precipitation"][j]
         donnees_finales["precipitation"].append(somme)
-
-    # moyenne des temperatures par jours
+    # Moyenne des temperatures par jour
     for i in range(0, len(doss["temperature"]), 24):
         somme = 0
         for j in range(i, i+24):
@@ -49,19 +59,20 @@ def dictionnaire(dossier):
 for i in range(len(fichiers)):
     dictionnaire(fichiers[i])
 
-# Dimension glacier-------------------------------------------------------------------------------------------
+# Dimension glacier----------------------------------------------------------//
 H = 900  # float(input("Quelle est l'épaisseur du glacier?"))
 P = 0.05# float(input("Quelle est la pente moyenne du glacier? En pourcentage"))/100
-L_incr = 2000
-L = 20000  # int(input("Quelle est la longueur du glacier?"))
+L_incr = 2000 #précision de nos calcul -> pour une précision maximum L_incr = L (trop de calculs)
+L = 20000  # int(input("Quelle est la longueur du glacier?"))#distance entre le sommet et le front du glacier sans compter l'altitud
 Larg = 1500  # int(input("Quelle est la largeur du glacier?"))
-tps = 365*len(fichiers)  # float(input("Temps de la simulation (en jour)"))
+tps = len(donnees_finales['temperature'])  # float(input("Temps de la simulation (en jour)"))
 Alt = Calculalt["altitude"]# on suppose que le point des données est le sommet du glacier
 alpha = math.atan(P)  # radians
 BaseG = Alt - P*L
 BaseR = Alt - P*L - H #base de la roche au niveau du glacier
 delta = int(L/L_incr)
-# Constantes
+
+# Constantes-----------------------------------------------------------------//
 V = 10/365  # m/jour
 p = 917  # kg/m^3
 g = 9.81  # constante pesanteur m/s^2
@@ -73,12 +84,12 @@ Ct = 2.215  #Conductivité thermique
 CL = 0.33*(10**6)  # Chaleur Latente
 Tr = 273 + 0.0  # Température à la roche
 
-# Modèle de vitesse, Déformation interne----------------------------------------//
+# Modèle de vitesse, Déformation interne-------------------------------------//
 '''
  la vitesse dépend uniquement de la proximité avec la roche.
  Pour notre simulation nous allons négliger le contact sur les bords du glacier.
  la vitesse est égale sur la largeur et la longueur.
- Ainsi la vitesse change avec la hauteur par rapport à la roche.
+ Ainsi, la vitesse change selon la distance par rapport à la roche.
  Nous pouvons mettre notre glacier à plat donc notre L devient différent
 '''
 L1 = L/math.cos(alpha) #longueur sur le glacier
@@ -128,7 +139,7 @@ plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
 plt.legend()
 
-
+    
 #Modele d'enneigement, Accumulation---------------------------------------------------//
 Coeff = 0.0001  # coeff d'enneigement par rapport à l'altitude (plus réaliste)
 dp = int(deplacement2[-2])
@@ -137,15 +148,15 @@ BaseGfinal = BaseG - P*(deplacement12[-1]-L)
 BaseRfinal = BaseR - P*(deplacement12[0]-L)
 """
 valeurs enneigement par jour:
-la hauteur de neige qui tombe a un coefficient de 10 par rapport à la précipitation(eau)
-pour passer de millimètre en mètre nous devons uniquement le diviser par 100
+la hauteur de neige qui tombe a un coefficient de 10 par rapport à la précipitation(eau).
+Pour passer de millimètre en mètre nous devons uniquement le diviser par 100
 """
 Valeursprecipitation = []
 for i in range(len(donnees_finales["precipitation"])):
     Valeursprecipitation.append(donnees_finales["precipitation"][i]/100)
 
 Ts = []  #Température surface
-for i in range(len(donnees_finales["temperature"])):
+for i in range(tps):
     TempJ = []
     for j in range(L_incr):
         TempJ.append(273 + donnees_finales["temperature"][i] + 6.5*P*j*(L/L_incr)/1000)
@@ -159,12 +170,12 @@ nbrsj = 4 #nbrs jour pour transformer en glace:
 for i in range(tps-nbrsj):
     for j in range(L_incr):
         if Ts[i][j] <= 273:
-             valeur = Valeursprecipitation[i]/10 + E[j] - Coeff*P*j*delta
+             valeur = Valeursprecipitation[i]/10 + E[j] - Coeff*P*j*delta #max de 0.1m pour L = 20000
              if valeur > 0:
                  del E[j]
                  E.insert(j, valeur)
         else:
-            valeur = E[j] - Valeursprecipitation[i]
+            valeur = E[j] - Valeursprecipitation[i]/10
             del E[j]
             E.insert(j, valeur)
                     
@@ -176,7 +187,7 @@ for i in range(nbrsj):
                 del E[j]
                 E.insert(j, valeur)
         else:
-            valeur = E[j] - Valeursprecipitation[i]
+            valeur = E[j] - Valeursprecipitation[i] /10
             del E[j]
             E.insert(j, valeur)
 
@@ -200,14 +211,21 @@ for i in range(L_incr):
     Varneige.append(E[i]+VraiZ[i])
     htt.append(E[i]+H)
 
-# Modele de fonte, Ablation------------------------------------------------------------//    
+# Modele de fonte, Ablation--------------------------------------------------// 
+'''
+Nous ne considérons pas le modèle de fonte sur la partie effondrer
+le volume est remplacé par l'accumulation en haut du glacier.
+L'effondremet est très imprévisible et selon sa forme,
+trop de paramètres rentrent en jeu pour réussir à faire une faible approximation.
+Notre modèle veut surtout étudier la différence de volume le long du glacier.
+'''    
 for i in range(tps):
     for j in range(L_incr):
         if Ts[i][j] > Tr:
             hauteur = htt[j]**(2) - (2*Ct*(Ts[i][j]-Tr)*3600*24)/(p*CL)
             fonte = hauteur**(1/2)
             del htt[j]
-            htt.insert(j, fonte)
+            htt.insert(j, fonte) 
 
 for i in range(L_incr):
     htt[i] = htt[i] - H + VraiZ[i]
@@ -228,10 +246,10 @@ pente_v = [] # pour le modele sans effondremment
 for i in range(1,Xmax+1):
     pente_v.append(dernier_point - Pentefinal*i*delta)
 
-haut = int(math.sin(alpha)*V*tps/2) # hauteur après un déplacement de vitesse initiale
+haut = int(math.sin(alpha)*V*tps/2) #hauteur après un déplacement de vitesse initiale
 
 x = np.linspace(0, L, L_incr)
-xxx = np.linspace(0, L+Xmax*delta, Xmax + L_incr)
+xxx = np.linspace(0, L+Xmax*delta + delta, Xmax + L_incr)
 yyy = np.linspace(BaseR-haut, pente_v[-1], H-1)
 xxx1 = np.linspace(0, L+Xmin*delta, Xmin + L_incr)
 yyy1 = np.linspace(BaseRfinal, int(ht[-1]), H-1)
@@ -257,7 +275,7 @@ plt.legend()
 
 
 # Graphique 3D---------------------------------------------------------------//
-# Création du graphique 3D
+# Création du graphique 3D---------------------------------------------------//
 x1 = np.linspace(-100, L+600, L_incr+70)
 x2 = np.linspace(0, Larg+200, Larg+200)
 X1, X2 = np.meshgrid(x1, x2)
@@ -343,9 +361,8 @@ with open('donnees_fonte.csv', 'w') as csv_file:
     writer = csv.writer(csv_file)
     writer.writerow(liste_diffinal)#différance hauteur entre temps t0 et temps t
     writer.writerow(VraiZ)#hauteur du glacier au temps t0
-    writer.writerow(E)#hauteur de neige et glace après temps t
-    writer.writerow(liste_difference)#Valeurs de ce qui a fondu
-
+    writer.writerow(E)#accumulation de neige et glace après temps t
+    writer.writerow(liste_difference)#Valeurs de ce qui a fondu (ablation et pluie)
 
 #convertir le dictionnaire python en fichier csv
 #header du fichier csv (nom de chaque colonnes)
