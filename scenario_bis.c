@@ -178,6 +178,7 @@ double niveau_lac(int jours, double debit, double surface, double niveau_i){
         double diff_vol = (affluent-effluent);
         niveau = niveau + diff_vol/surface;
     }
+    return niveau;
 }
 
 int main(){
@@ -243,6 +244,9 @@ int main(){
     
     Fichiercsv("Vale.csv", temperature_scenario, 5*366, 1);
 	free(Valeursdiff);
+    double niveau = niveau_lac(5*366, moyenne_debit_jours, 32000000, 15.5);
+    double delta_niveau = 15.5-niveau; 
+    printf("Admettons qu'il y ai un lac de 15,5m de profondeur et une superficie de 3,2km^2, en considérant comme unique affluent l'eau venant des glaciers,la différence de niveau est de %f m en 5ans", delta_niveau);
     
     return 0;
 }
