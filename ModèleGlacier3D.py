@@ -6,6 +6,15 @@ import csv
 
 # recuperer les donnees necessaires a notre simulation du fichier meteoblue json
 fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
+#glacier = "altesch" #input("Entrer un des glaciers entre aletsch, rosablanche et grand_combin: ")
+#if glacier == "aletsch":
+#    fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
+#if glacier == "rosablanche":
+#    fichiers = ["rosablanche2016.json", "rosablanche2017.json","rosablanche2018.json", "rosablanche2019.json", "rosablanche2020.json"]
+#if glacier == "grand_combin":
+#    fichiers = ["grand_combin2016.json", "grand_combin2017.json","grand_combin2018.json", "grand_combin2019.json", "grand_combin2020.json"]
+#else: 
+    #print("Vérifiez si le nom que vous avez entré est bien en minuscules, si oui nous n'avons pas les données pour ce glacier")
 
 def telecharger(dossier):
     with open(dossier, "r") as donnees_initiales:
@@ -50,12 +59,12 @@ for i in range(len(fichiers)):
     dictionnaire(fichiers[i])
 
 # Dimension glacier-------------------------------------------------------------------------------------------
-H = 900  # float(input("Quelle est l'épaisseur du glacier?"))
-P = 0.05# float(input("Quelle est la pente moyenne du glacier? En pourcentage"))/100
+H = int(input("Quelle est l'épaisseur du glacier? (int) ")) #900
+P = float(input("Quelle est la pente moyenne du glacier? En pourcentage "))/100 #0.05
 L_incr = 2000
-L = 20000  # int(input("Quelle est la longueur du glacier?"))
-Larg = 1500  # int(input("Quelle est la largeur du glacier?"))
-tps = 365*len(fichiers)  # float(input("Temps de la simulation (en jour)"))
+L = 20000 #int(input("Quelle est la longueur du glacier? ")) #20000
+Larg = 1500 #int(input("Quelle est la largeur du glacier? ")) #1500
+tps = int(input("Temps de la simulation en jour (max 1826) ")) #365*len(fichiers)  
 Alt = Calculalt["altitude"]# on suppose que le point des données est le sommet du glacier
 alpha = math.atan(P)  # radians
 BaseG = Alt - P*L
