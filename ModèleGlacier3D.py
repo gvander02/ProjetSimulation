@@ -25,7 +25,6 @@ glacier = input("Entrer un des glaciers entre aletsch, rosablanche (Glacier du G
 if glacier == "aletsch":
     H = 900  
     P = 0.05
-    L_incr = 2000
     L = 20000 
     Larg = 1500
     fichiers1985 = ["aletsch1985.json","aletsch1986.json","aletsch1987.json","aletsch1988.json","aletsch1989.json"]
@@ -33,7 +32,6 @@ if glacier == "aletsch":
 elif glacier == "rosablanche":
     H = 500  
     P = 0.03
-    L_incr = 2000
     L = 2500 
     Larg = 1000
     fichiers1985 = ["rosablanche1985.json", "rosablanche1986.json","rosablanche1987.json", "rosablanche1988.json", "rosablanche1989.json"]
@@ -41,7 +39,6 @@ elif glacier == "rosablanche":
 elif glacier == "grand_combin":
     H = 600  
     P = 0.08
-    L_incr = 2000
     L = 10000
     Larg = 1800
     fichiers1985 = ["grand_combin1985.json", "grand_combin1986.json","grand_combin1987.json", "grand_combin1988.json", "grand_combin1989.json"]
@@ -96,6 +93,7 @@ for i in range(len(fichiers1985)):
 # Dimension glacier----------------------------------------------------------//
 tps = len(donnees_finales['temperature'])  # float(input("Temps de la simulation (en jour)"))
 tps1985 = len(donnees_finales1985['temperature'])
+L_incr = 2000
 # Dimension glacier------------------------------------------------------------------------------------------- 
 Alt = Calculalt["altitude"]# on suppose que le point des données est le sommet du glacier
 alpha = math.atan(P)  # radians

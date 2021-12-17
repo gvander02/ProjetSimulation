@@ -158,37 +158,15 @@ double MasseFinale(double tableau[], int l_incr, int longueur, int largeur, doub
 	return massevolumique*VolumeFinal(tableau, l_incr, longueur, largeur, pente, epaisseur);
 }
 
-void Fichiercsv(char * fichier, double tableau[], int colonnes, int lignes){
-	FILE * file = fopen(fichier, "w+");
-		for (int y = 0; y < lignes; y++){
-			for (int x = 0; x < colonnes; x++){
-				double p = tableau[y*colonnes+x];
-				if (x > 0) fprintf(file, ", ");
-					fprintf(file, "%f", p);
-			}
-			fprintf(file, "\n");
-		}
-	fclose(file);
-}
-
-double niveau_lac(int jours, double debit, double surface, double niveau_i, int tps){
+double niveau_lac(int jours, double debit, double debit_scen, double surface, double niveau_i){
     // evolution par jour du niveau du lac
     // nous avons mis des dimensions au hazard
     double niveau = niveau_i;
-    double affluent = debit/(3600*24);
-    for(int i=0; i< tps; i++){
-        double effluent = pow(niveau-15.01,2)*250*3600*24; //m^3/j
-        double diff_vol = (affluent-effluent);
-        niveau = niveau + diff_vol/surface;
-    }
-	return niveau;
+    double affluent = debit_scen;
+    double effluent = debit;
+    double diff_volume = (affluent-effluent)*jours;
+    return niveau + diff_volume/surface;
 }
-
-_Bool Masse_norm(){
-	for(int i=0; i< 100; i++){
-	}
-	return true;
-}	
 
 int main(){
 	int L_incr = 2000;
@@ -211,13 +189,12 @@ int main(){
 	double Vf = VolumeFinal(Valeursdiff, L_incr, L, Larg, P, H);
 	double Mf = MasseFinale(Valeursdiff, L_incr, L, Larg, P, H);
 	double pourcentageM = 1-Mf/M;
+	float moyenne_debit_jours = debit(Valeursdiff, Larg, L_incr, L)/(tps);
 	
 	printf("Selon le modele de base sur python, le volume du glacier diminue de: %.3em^3, a: %.3em^3, ", V, Vf);
 	printf("la masse totale du glacier diminue de: %0.3eKg3, a: %0.3eKg, ce qui correspond a une baisse de: %f%c sur 5 annees.\n\n", M, Mf, pourcentageM, 37);
     printf("Nous avons fait un scenario qui simule aussi la fonte du meme glacier environ 80 ans plus tard,");
     printf(" avec des temperatures qui devrait augementer et des vagues de chaleurs plus longues et plus intenses\n\n");
-    // somme des diff et diviser par nb de jours donne la moyenne
-    float moyenne_debit_jours = debit(Valeursdiff, Larg, L_incr, L)/(tps);
     printf("Le debit moyen par jour est de: %0.2f m^3, ",moyenne_debit_jours);
     
     double temperature_scenario[tps];
@@ -244,6 +221,12 @@ int main(){
 	double pourcentageD = debit_scen/moyenne_debit_jours;
     printf("le debit moyen de notre scenario par jour est de: %0.2f m^3, soit une augementation de %f%c.\n\n", debit_scen, pourcentageD, 37);
     
+    // somme des diff et diviser par nb de jours donne la moyenne
+    double niveau = niveau_lac(tps, moyenne_debit_jours, debit_scen, 32000000, 15.5);
+    double delta_niveau = niveau - 15.5; 
+    printf("Admettons qu'il y ai un lac de 15,5m de profondeur et une superficie de 3,2km^2, Ces dimensions sont prises pour un lac moyen de glacier. En considerant comme unique affluent l'eau venant des glaciers, le niveau du lac augemente de %f m en 5ans.\n\n", delta_niveau);
+    
+    
     //tableau des differences avec le nouveau modele de fonte
     double difference_scen[L_incr];
     for (int i=0; i<L_incr; i++){
@@ -254,12 +237,6 @@ int main(){
     double Vfs = Vf - VolumeFinal_scen;
     printf("Le volume final, avec le scenario augementant la temperature et avec des vagues de chaleur, est de: %0.3em^3, il y a donc une diminution de %f%c.", VolumeFinal_scen, pourcentageVs, 37);
     printf(" Soit %0.2em^3 de moins que selon notre modele de base\n\n", Vfs);
-    
-    Fichiercsv("Vale.csv", difference_scen, L_incr, 1);
-	free(Valeursdiff);
-    double niveau = niveau_lac(5*366, moyenne_debit_jours, 32000000, 15.5, tps);
-    double delta_niveau = 15.5-niveau; 
-    printf("Admettons qu'il y ai un lac de 15,5m de profondeur et une superficie de 3,2km^2, en considérant comme unique affluent l'eau venant des glaciers,la différence de niveau est de %f m en 5ans", delta_niveau);
-    
+   	free(Valeursdiff); 
     return 0;
 }
