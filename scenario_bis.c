@@ -191,21 +191,21 @@ _Bool Masse_norm(){
 }	
 
 int main(){
-	int L = 20000;
 	int L_incr = 2000;
-    int Larg = 1500;
-    int P = 5;
-    int H = 900;
-    int tps = 1827;
-		
+
 	//tableau des données du code python
-	double * Valeursdiff = malloc(4 * L_incr * sizeof (double));
-    lire_donnees_csv("donnees_fonte.csv", Valeursdiff, L_incr, 4);
+	double * Valeursdiff = malloc(5 * L_incr * sizeof (double));
+    lire_donnees_csv("donnees_fonte.csv", Valeursdiff, L_incr, 5);
+    
+    int L = Valeursdiff[4*L_incr+1];
+    int Larg = Valeursdiff[4*L_incr+2];
+    int P = Valeursdiff[4*L_incr+3]*100;
+    int H = Valeursdiff[4*L_incr];
+    int tps = 1827;
     
     //tableau avec les donnees meteoblue
     double * values = malloc(2*tps * sizeof (double));
     lire_donnees_csv("donnees_finales.csv", values, 2, tps);
-	printf("%f", values[3]);
 	double V = VolumeInitial(L, Larg, P, H);
 	double M = MasseInitiale(L, Larg, P, H);
 	double Vf = VolumeFinal(Valeursdiff, L_incr, L, Larg, P, H);
@@ -253,7 +253,7 @@ int main(){
     double pourcentageVs = 1-VolumeFinal_scen/V;
     double Vfs = Vf - VolumeFinal_scen;
     printf("Le volume final, avec le scenario augementant la temperature et avec des vagues de chaleur, est de: %0.3em^3, il y a donc une diminution de %f%c.", VolumeFinal_scen, pourcentageVs, 37);
-    printf(" Soit %0.2em^3 de moins que selon notre modele de base\n", Vfs);
+    printf(" Soit %0.2em^3 de moins que selon notre modele de base\n\n", Vfs);
     
     Fichiercsv("Vale.csv", difference_scen, L_incr, 1);
 	free(Valeursdiff);

@@ -21,8 +21,6 @@ from matplotlib.widgets import Slider
 
 
 # recuperer les donnees necessaires a notre simulation du fichier meteoblue json
-#fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
-fichiers1985 = ["aletsch1985.json","aletsch1986.json","aletsch1987.json","aletsch1988.json","aletsch1989.json"]
 glacier = input("Entrer un des glaciers entre aletsch, rosablanche (Glacier du Grand Désert) et grand_combin (Glacier Corbassière): ")
 if glacier == "aletsch":
     H = 900  
@@ -32,18 +30,18 @@ if glacier == "aletsch":
     Larg = 1500
     fichiers1985 = ["aletsch1985.json","aletsch1986.json","aletsch1987.json","aletsch1988.json","aletsch1989.json"]
     fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
-if glacier == "rosablanche":
+elif glacier == "rosablanche":
     H = 500  
     P = 0.03
-    L_incr = 250
+    L_incr = 2000
     L = 2500 
     Larg = 1000
     fichiers1985 = ["rosablanche1985.json", "rosablanche1986.json","rosablanche1987.json", "rosablanche1988.json", "rosablanche1989.json"]
     fichiers = ["rosablanche2016.json", "rosablanche2017.json","rosablanche2018.json", "rosablanche2019.json", "rosablanche2020.json"]
-if glacier == "grand_combin":
+elif glacier == "grand_combin":
     H = 600  
     P = 0.08
-    L_incr = 1000
+    L_incr = 2000
     L = 10000
     Larg = 1800
     fichiers1985 = ["grand_combin1985.json", "grand_combin1986.json","grand_combin1987.json", "grand_combin1988.json", "grand_combin1989.json"]
@@ -454,6 +452,7 @@ with open('donnees_fonte.csv', 'w') as csv_file:
     writer.writerow(VraiZ)#hauteur du glacier au temps t0
     writer.writerow(E)#accumulation de neige et glace après temps t
     writer.writerow(liste_difference)#Valeurs de ce qui a fondu (ablation et pluie)
+    writer.writerow([H,L,Larg,P])
 
 #convertir le dictionnaire python en fichier csv
 #header du fichier csv (nom de chaque colonnes)
