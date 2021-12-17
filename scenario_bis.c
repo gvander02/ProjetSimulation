@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include <time.h>
-#include <conio.h>
 
 // lire les donnees du fichier csv (jour, precipitation, temperature), et les mettre dans un tableau malloc
 _Bool lire_donnees_csv(char * nom_csv, double * values, int colonnes, int lignes){
@@ -67,7 +66,7 @@ _Bool scenario_temp(double * values, double * temperature_scenario, int temps){
     for(int i = 0; i<temps; i++){
         double randDomain = RAND_MAX + 1.0;
         int ajout = (int) (rand() / randDomain * 5 - 1);
-        temperature_scenario[i] = values[2*i+1] + 273.0 + ajout;
+        temperature_scenario[i] = values[2*i+3] + 273.0 + ajout;
 	}
 	return true;
 }
@@ -106,7 +105,7 @@ _Bool scenario_temp2(double * temperature_scenario, int tps){
     return true;
 }
 
-_Bool modele_fonte(double * hauteur, double * temperature, int time, int l_incr, double pente, double * Hauteur, int H){
+_Bool modele_fonte(double * hauteur, double * temperature, int time, int l_incr, double pente, double * Hauteur, int H, double * precipitation){
 	// l'enneigement initial ne change pas lorsque la temperature change 
 	// donc on prend les valeurs de la hauteur calculee dans le code python 
 	// auquel on applique le modele de fonte pour calculer la hauteur finale
@@ -117,10 +116,11 @@ _Bool modele_fonte(double * hauteur, double * temperature, int time, int l_incr,
     double cl = 0.33*pow(10,6); // chaleur latente de fusion de la glace 
     double temperature_h[l_incr];
     for (int i = 0; i<time; i++){
-        for (int j = 0; j<l_incr; j++){
+		for (int j = 0; j<l_incr; j++){
             temperature_h[j]=temperature[i]+(6.5*pente*j)/1000;
             if (temperature_h[j]>Tr){
-                double diff= hauteur[j]*hauteur[j]-(2*Dt*(temperature_h[j]-Tr)*3600*24)/(p*cl);
+				double pluie = precipitation[i];
+                double diff= pow((hauteur[j]-pluie),2)-(2*Dt*(temperature_h[j]-Tr)*3600*24)/(p*cl);
                 double fonte = sqrt(diff);
                 hauteur[j]=fonte;
             }
@@ -171,17 +171,24 @@ void Fichiercsv(char * fichier, double tableau[], int colonnes, int lignes){
 	fclose(file);
 }
 
-double niveau_lac(int jours, double debit, double surface, double niveau_i){
+double niveau_lac(int jours, double debit, double surface, double niveau_i, int tps){
     // evolution par jour du niveau du lac
     // nous avons mis des dimensions au hazard
     double niveau = niveau_i;
     double affluent = debit/(3600*24);
-    for(int i=0; i<5*366; i++){
+    for(int i=0; i< tps; i++){
         double effluent = pow(niveau-15.01,2)*250*3600*24; //m^3/j
         double diff_vol = (affluent-effluent);
         niveau = niveau + diff_vol/surface;
     }
+	return niveau;
 }
+
+_Bool Masse_norm(){
+	for(int i=0; i< 100; i++){
+	}
+	return true;
+}	
 
 int main(){
 	int L = 20000;
@@ -190,9 +197,7 @@ int main(){
     int P = 5;
     int H = 900;
     int tps = 1827;
-	
-	textcolor(RED);
-	
+		
 	//tableau des données du code python
 	double * Valeursdiff = malloc(4 * L_incr * sizeof (double));
     lire_donnees_csv("donnees_fonte.csv", Valeursdiff, L_incr, 4);
@@ -200,7 +205,7 @@ int main(){
     //tableau avec les donnees meteoblue
     double * values = malloc(2*tps * sizeof (double));
     lire_donnees_csv("donnees_finales.csv", values, 2, tps);
-
+	printf("%f", values[3]);
 	double V = VolumeInitial(L, Larg, P, H);
 	double M = MasseInitiale(L, Larg, P, H);
 	double Vf = VolumeFinal(Valeursdiff, L_incr, L, Larg, P, H);
@@ -209,12 +214,17 @@ int main(){
 	
 	printf("Selon le modele de base sur python, le volume du glacier diminue de: %.3em^3, a: %.3em^3, ", V, Vf);
 	printf("la masse totale du glacier diminue de: %0.3eKg3, a: %0.3eKg, ce qui correspond a une baisse de: %f%c sur 5 annees.\n\n", M, Mf, pourcentageM, 37);
-    
+    printf("Nous avons fait un scenario qui simule aussi la fonte du meme glacier environ 80 ans plus tard,");
+    printf(" avec des temperatures qui devrait augementer et des vagues de chaleurs plus longues et plus intenses\n\n");
     // somme des diff et diviser par nb de jours donne la moyenne
     float moyenne_debit_jours = debit(Valeursdiff, Larg, L_incr, L)/(tps);
     printf("Le debit moyen par jour est de: %0.2f m^3, ",moyenne_debit_jours);
     
     double temperature_scenario[tps];
+    double precipitation[tps];
+	for (int i=0;i<tps;i++){
+		precipitation[i] = values[2*i+2]/1000;
+	}
     scenario_temp(values, temperature_scenario, tps);
     scenario_temp2(temperature_scenario, tps);
     
@@ -224,11 +234,11 @@ int main(){
     double Hauteur[L_incr];
     for(int i=0;i<L_incr;i++){
 		Variation_neige[i]=Valeursdiff[2*L_incr+i];
-        hauteur[i]= H+Variation_neige[i];
+        hauteur[i]= H;
 		Hauteur[i]=Valeursdiff[1*L_incr+i];
     }
     // calculer la hauteur apres avoir applique le modele de fonte
-    modele_fonte(hauteur, temperature_scenario, tps, L_incr, P, Hauteur, H);
+    modele_fonte(hauteur, temperature_scenario, tps, L_incr, P, Hauteur, H, precipitation);
     
 	double debit_scen = scenario_debit(L_incr, Larg, Hauteur, hauteur, Variation_neige, tps, L);
 	double pourcentageD = debit_scen/moyenne_debit_jours;
@@ -243,7 +253,7 @@ int main(){
     double pourcentageVs = 1-VolumeFinal_scen/V;
     double Vfs = Vf - VolumeFinal_scen;
     printf("Le volume final, avec le scenario augementant la temperature et avec des vagues de chaleur, est de: %0.3em^3, il y a donc une diminution de %f%c.", VolumeFinal_scen, pourcentageVs, 37);
-    printf(" Soit %0.2fm^3 de moins que selon notre modele de base\n", Vfs);
+    printf(" Soit %0.2em^3 de moins que selon notre modele de base\n", Vfs);
     
     Fichiercsv("Vale.csv", difference_scen, L_incr, 1);
 	free(Valeursdiff);

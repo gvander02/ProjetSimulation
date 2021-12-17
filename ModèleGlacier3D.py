@@ -17,9 +17,12 @@ import matplotlib.pyplot as plt
 import math
 import json
 import csv
+from matplotlib.widgets import Slider
+
 
 # recuperer les donnees necessaires a notre simulation du fichier meteoblue json
 fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
+fichiers1985 = ["aletsch1985.json","aletsch1986.json","aletsch1987.json","aletsch1988.json","aletsch1989.json"]
 
 def telecharger(dossier):
     with open(dossier, "r") as donnees_initiales:
@@ -40,24 +43,30 @@ donnees_finales = {'time': []}
 donnees_finales.update({'precipitation': []})
 donnees_finales.update({'temperature': []})
 
-def dictionnaire(dossier):
+donnees_finales1985 = {'time': []}
+donnees_finales1985.update({'precipitation': []})
+donnees_finales1985.update({'temperature': []})
+
+def dictionnaire(dossier, dictio):
     doss = telecharger(dossier)
     # Somme des precipitations par jours
     for i in range(0, len(doss["precipitation"]), 24):
         somme = 0
         for j in range(i, i+24):
             somme += doss["precipitation"][j]
-        donnees_finales["precipitation"].append(somme)
+        dictio["precipitation"].append(somme)
     # Moyenne des temperatures par jour
     for i in range(0, len(doss["temperature"]), 24):
         somme = 0
         for j in range(i, i+24):
             somme += doss["temperature"][j]
-        donnees_finales["temperature"].append(somme/24)
-    return donnees_finales
+        dictio["temperature"].append(somme/24)
+    return dictio
 
 for i in range(len(fichiers)):
-    dictionnaire(fichiers[i])
+    dictionnaire(fichiers[i], donnees_finales)
+for i in range(len(fichiers1985)):
+    dictionnaire(fichiers1985[i], donnees_finales1985)
 
 # Dimension glacier----------------------------------------------------------//
 H = 900  # float(input("Quelle est l'épaisseur du glacier?"))
@@ -66,6 +75,7 @@ L_incr = 2000 #précision de nos calcul -> pour une précision maximum L_incr = 
 L = 20000  # int(input("Quelle est la longueur du glacier?"))#distance entre le sommet et le front du glacier sans compter l'altitud
 Larg = 1500  # int(input("Quelle est la largeur du glacier?"))
 tps = len(donnees_finales['temperature'])  # float(input("Temps de la simulation (en jour)"))
+tps1985 = len(donnees_finales1985['temperature'])
 Alt = Calculalt["altitude"]# on suppose que le point des données est le sommet du glacier
 alpha = math.atan(P)  # radians
 BaseG = Alt - P*L
@@ -90,11 +100,11 @@ Tr = 273 + 0.0  # Température à la roche
  Pour notre simulation nous allons négliger le contact sur les bords du glacier.
  la vitesse est égale sur la largeur et la longueur.
  Ainsi, la vitesse change selon la distance par rapport à la roche.
- Nous pouvons mettre notre glacier à plat donc notre L devient différent
+ Nous pouvons mettre notre glacier à plat donc notre L devient différent.
 '''
 L1 = L/math.cos(alpha) #longueur sur le glacier
+x = np.linspace(0, H, H)
 xx = np.linspace(0, L1, L_incr)
-yy = np.linspace(0, H, H)
 
 def vitesse(y):
     v = V + b*y*(2*H-y)*3600*24
@@ -106,41 +116,49 @@ for i in range(L_incr-2):
 W.append(0)
 w = np.array(W)
 
-vv = []
-for i in range(H):
-    vv.append(vitesse(i))
-
 deplacement = []
 deplacement2 = []
 for i in range(H-1):
-    deplacement.append(L+ tps*vv[i])
-    deplacement2.append(L1 + tps*vv[i])
+    deplacement.append(L+ tps*vitesse(i))
+    deplacement2.append(L1 + tps*vitesse(i))
 deplacement2.append(L1)
-
-vv1 = []
-for i in range(H):
-    vv1.append(vitesse(H-i))
 
 deplacement1 = []
 deplacement12 = []
 for i in range(H-1):
-    deplacement1.append(L + tps*vv1[i])
-    deplacement12.append(L1 + tps*vv1[i])
+    deplacement1.append(L + tps*vitesse(H-i))
+    deplacement12.append(L1 + tps*vitesse(H-i))
 deplacement12.append(L1)
+
+Yy = L1+ tps*(V + k*math.sin(math.atan(P))*(H-x)*(2*H-(H-x))*3600*24/2)
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set_aspect('equal', adjustable='box')
-ax.set_ylim(0, H + 600)
-plt.plot(xx, w, label="Glacier à plat", color = 'lightblue')
-plt.plot(deplacement2, yy, ':', label=f"Glacier après {tps} jours sans effondrement", color = 'green')
-plt.plot(deplacement12, yy, label=f"Glacier après {tps} jours et après effondrement", color = 'red')
 plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
-plt.legend()
+ax.set_ylim(0, H + 600)
+ax.set_xlim(-100, L1 + 6000)
 
+plt.plot(xx, w, label="Glacier à plat", color = 'lightblue')
+plt.plot(deplacement2, x, ':', label=f"Glacier après {tps} jours sans effondrement", color = 'green')
+plt.plot(deplacement12, x, label=f"Glacier après {tps} jours et après effondrement", color = 'red')
+Pp = plt.plot(Yy, x, label='glacier selon la pente', color = 'darkblue')
+plt.legend(loc= 'upper left')
+
+ax_slide = plt.axes([0.1, 0.9, 0.5, 0.05])
+s_factor = Slider(ax_slide, 'Pente', valmin = 0, valmax = 0.5, valinit = P, valstep = 0.01)
+
+def update(val):
+    current_v = s_factor.val
+    Yy = L1 + tps*(V + k*math.sin(math.atan(current_v))*(H-x)*(2*H-(H-x))*3600*24/2)
+    Pp[0].set_xdata(Yy)
+    plt.draw()  
+     
+s_factor.on_changed(update)
+#fig.savefig('Figure_1.jpeg')
     
-#Modele d'enneigement, Accumulation---------------------------------------------------//
+#Modele d'enneigement, Accumulation. Modele de fonte, Ablation---------------------------------------------------//
 Coeff = 0.0001  # coeff d'enneigement par rapport à l'altitude (plus réaliste)
 dp = int(deplacement2[-2])
 dp1 = int(deplacement12[-2])
@@ -155,45 +173,113 @@ Valeursprecipitation = []
 for i in range(len(donnees_finales["precipitation"])):
     Valeursprecipitation.append(donnees_finales["precipitation"][i]/100)
 
+Valeursprecipitation1985 = []
+for i in range(len(donnees_finales1985["precipitation"])):
+    Valeursprecipitation1985.append(donnees_finales1985["precipitation"][i]/100)
+
 Ts = []  #Température surface
+Tsgraphx = []
 for i in range(tps):
     TempJ = []
     for j in range(L_incr):
         TempJ.append(273 + donnees_finales["temperature"][i] + 6.5*P*j*(L/L_incr)/1000)
     Ts.append(TempJ)
+    Tsgraphx.append(TempJ[0])
+del Tsgraphx[60]#premier 29 février
+del Tsgraphx[1520]
+  
+Ts1985 = []  #Température surface
+Tsgraph1985x = []
+for i in range(tps1985):
+    TempJ = []
+    for j in range(L_incr):
+        TempJ.append(273 + donnees_finales1985["temperature"][i] + 6.5*P*j*(L/L_incr)/1000)
+    Ts1985.append(TempJ)
+    Tsgraph1985x.append(TempJ[0])
+del Tsgraph1985x[1155]
+
+Tsgraph = []
+Tsgraph1985 = []
+Kelvin0 = []
+Moy = 7   #Modifier pour mieux analyser les données des températures
+for i in range(0, tps1985-Moy, Moy):
+    Kelvin0.append(273)
+    temp = 0.0
+    temp1985 = 0.0
+    for j in range(i, i + Moy):
+        temp += Tsgraphx[j]
+        temp1985 += Tsgraph1985x[j]
+    Tsgraph.append(temp/Moy)
+    Tsgraph1985.append(temp1985/Moy)
+
+axe = np.linspace(0, tps, int((tps1985-1)/Moy))
+fig = plt.figure()
+ax = fig.add_subplot(111)
+plt.plot(axe, Tsgraph, label='températures de 2016 à 2020', color = 'blue')
+plt.plot(axe, Tsgraph1985, label='températures de 1985 à 1989', color = 'orange')
+plt.plot(axe, Kelvin0, label='273 Kelvin, 0°', color = 'black')
+plt.grid()
+plt.legend()
 
 E = []  #on commence l'année avec un enneigement initiale de (2m si en hiver)
+E1985 = []
 for i in range(L_incr):
     E.append(1.0)
-
+    E1985.append(1.0)
+    
+htt = []
+for i in range(L_incr):
+    htt.append(H)
+#Fonction Accumulation et Ablation--------------------------------------------------// 
+'''
+Nous ne considérons pas le modèle de fonte sur la partie effondrée
+le volume est remplacé par l'accumulation en haut du glacier.
+L'effondremet est très imprévisible et selon sa forme,
+trop de paramètres rentrent en jeu pour réussir à faire une faible approximation.
+Notre modèle veut surtout étudier la différence de volume le long du glacier.
+'''    
 nbrsj = 4 #nbrs jour pour transformer en glace:
-for i in range(tps-nbrsj):
-    for j in range(L_incr):
-        if Ts[i][j] <= 273:
-             valeur = Valeursprecipitation[i]/10 + E[j] - Coeff*P*j*delta #max de 0.1m pour L = 20000
-             if valeur > 0:
-                 del E[j]
-                 E.insert(j, valeur)
-        else:
-            valeur = E[j] - Valeursprecipitation[i]/10
-            del E[j]
-            E.insert(j, valeur)
+def evolution(precipitation, temperatures, enneigement, temps):
+    for i in range(temps-nbrsj):
+        for j in range(L_incr):
+            if temperatures[i][j] <= 273:
+                valeur = precipitation[i]/10 + enneigement[j] - Coeff*P*j*delta #max de 0.1m pour L = 20000
+                if valeur > 0:
+                    del enneigement[j]
+                    enneigement.insert(j, valeur)
+            else:
+                valeur = enneigement[j] - precipitation[i]/10
+                del enneigement[j]
+                enneigement.insert(j, valeur)
+                #Ablation
+                hauteur = (htt[j] - precipitation[i]/10)**(2) - (2*Ct*(Ts[i][j]-Tr)*3600*24)/(p*CL)
+                fonte = hauteur**(1/2)
+                del htt[j]
+                htt.insert(j, fonte)
                     
-for i in range(nbrsj):
-    for j in range(L_incr):
-        if Ts[i][j] <= 273:
-            valeur = Valeursprecipitation[tps-nbrsj+i] + E[j] - Coeff*P*j*delta
-            if valeur > 0:
-                del E[j]
-                E.insert(j, valeur)
-        else:
-            valeur = E[j] - Valeursprecipitation[i] /10
-            del E[j]
-            E.insert(j, valeur)
+    for i in range(nbrsj):
+        for j in range(L_incr):
+            if temperatures[i][j] <= 273:
+                valeur = precipitation[temps-nbrsj+i] + enneigement[j] - Coeff*P*j*delta
+                if valeur > 0:
+                    del enneigement[j]
+                    enneigement.insert(j, valeur)
+            else:
+                valeur = enneigement[j] - precipitation[i]/10
+                del enneigement[j]
+                enneigement.insert(j, valeur)
+                #Ablation
+                hauteur = (htt[j] - precipitation[i]/10)**(2) - (2*Ct*(Ts[i][j]-Tr)*3600*24)/(p*CL)
+                fonte = hauteur**(1/2)
+                del htt[j]
+                htt.insert(j, fonte)
+                    
+evolution(Valeursprecipitation, Ts, E, tps)
+#neige(Valeursprecipitation1985, Ts1985, E1985, tps1985)
 
 #Graphique 2D----------------------------------------------------------------//
 '''
-Pour voir le rectangle et pas juste la fonction on utilise une liste, pas comme le graph de y
+Pour voir le rectangle et pas juste la fonction on utilise une liste, pas comme le graph de yy
 '''
 # hauteur glacier au temps t0
 Z = [BaseR + P*L]
@@ -203,31 +289,13 @@ Z.append(BaseR)
 
 # niveau de la neige
 Varneige = []
+Varneige1985 = []
 VraiZ =[]
-htt = []
 for i in range(L_incr):
     VraiZ.append(P*L-P*i*delta + BaseG)
 for i in range(L_incr):
     Varneige.append(E[i]+VraiZ[i])
-    htt.append(E[i]+H)
-
-# Modele de fonte, Ablation--------------------------------------------------// 
-'''
-Nous ne considérons pas le modèle de fonte sur la partie effondrer
-le volume est remplacé par l'accumulation en haut du glacier.
-L'effondremet est très imprévisible et selon sa forme,
-trop de paramètres rentrent en jeu pour réussir à faire une faible approximation.
-Notre modèle veut surtout étudier la différence de volume le long du glacier.
-'''    
-for i in range(tps):
-    for j in range(L_incr):
-        if Ts[i][j] > Tr:
-            hauteur = htt[j]**(2) - (2*Ct*(Ts[i][j]-Tr)*3600*24)/(p*CL)
-            fonte = hauteur**(1/2)
-            del htt[j]
-            htt.insert(j, fonte) 
-
-for i in range(L_incr):
+    Varneige1985.append(E1985[i]+VraiZ[i])
     htt[i] = htt[i] - H + VraiZ[i]
 
 Pentefinal = (htt[-2]-htt[-1])/delta
@@ -243,32 +311,33 @@ for i in range(1,Xmin + 1):
     ht.append(dernier_point - Pentefinal*i*delta)
     
 pente_v = [] # pour le modele sans effondremment
-for i in range(1,Xmax+1):
+for i in range(Xmax):
     pente_v.append(dernier_point - Pentefinal*i*delta)
 
 haut = int(math.sin(alpha)*V*tps/2) #hauteur après un déplacement de vitesse initiale
 
-x = np.linspace(0, L, L_incr)
+xx = np.linspace(0, L, L_incr)
 xxx = np.linspace(0, L+Xmax*delta + delta, Xmax + L_incr)
 yyy = np.linspace(BaseR-haut, pente_v[-1], H-1)
 xxx1 = np.linspace(0, L+Xmin*delta, Xmin + L_incr)
 yyy1 = np.linspace(BaseRfinal, int(ht[-1]), H-1)
 xxx2 = np.linspace(L, L+Xmax*delta, Xmax)
 
-# niveau du sol y
-y = P*L-P*xxx + BaseR
+# niveau du sol yy
+yy = P*L-P*xxx + BaseR
 
 # taille égale des axes
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set_aspect('equal', adjustable='box')
-plt.plot(x, Varneige, label="Enneigement", color='darkblue')
-plt.plot(x, Z, label="Glacier au temps t0", color='lightblue')
-plt.plot(xxx, y, label="Roche", color="black")
+plt.plot(xx, Varneige, label="Enneigement", color='darkblue')
+plt.plot(xx, Z, label="Glacier au temps t0", color='lightblue')
+plt.plot(xxx, yy, label="Roche", color="black")
 plt.plot(xxx1, ht, label="Glacier au temps t", color="red")
 plt.plot(deplacement1, yyy1, color="red")
 plt.plot(deplacement, yyy, ':', label = f'glacier après {tps} jours', color="green")
 plt.plot(xxx2, pente_v, ':', color = 'green')
+#plt.plot(xx, Varneige1985, label="Enneigement en 1985", color='violet')
 plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
 plt.legend()
@@ -335,11 +404,10 @@ ax = plt.axes(projection='3d')
 ax.set_xlim(0, L + 500)
 ax.set_ylim(-300, Larg + 300)
 ax.set_zlim(BaseR-200, Alt+100)
-tailleGt = 5
 tailleR = 0.5
 tailleG = 2
 ax.plot_wireframe(X1, X2, Zr, tailleR, color='black')
-ax.plot_wireframe(XX1, XX2, Zg, tailleR, color='lightblue')
+ax.plot_wireframe(XX1, XX2, Zg, tailleG, color='lightblue')
 ax.plot_wireframe(XXX1, XXX2, Zgt, tailleG, color='red')
 ax.plot_wireframe(Zgt2, YYY2, YYY1, tailleG, color='red')
 plt.show()
