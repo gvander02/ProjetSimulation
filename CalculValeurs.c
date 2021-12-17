@@ -1,3 +1,228 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Modélisation de glacier</title>
+    <style>
+        body { background: white; font-family: sans-serif; margin: 0; padding: 25px }
+    </style>
+</head>
+
+<body>
+    <h1><center>Modélisation de l'évolution d'un glacier</center></h1>
+    <p>Un glacier est une accumulation de glace le long d'une vallée.
+	Il se forme grâce aux couches de neige qui viennent se superposer.
+	Écrasée sous son propre poids, la neige se compact et rejete les substances gazeuses.
+	Ainsi, elle se soude en une masse dense et homogène pour se transformer en glace. Les glaciers sont des reserves primordiales en eau douce. De nos jours, ils sont le sujet de nombreuses discussions.
+	C'est pourquoi, nous avons décidé de modéliser comment et à quelle vitesse un glacier des alpes devrait fondre...</p>
+	<p> Pour ce faire, nous observons le glacier d'Aletsch qui est le plus grand et le plus emblématique des alpes.
+	Le code utilisé fonctionne pour n'importe quel glacier, avec ses dimensions et ses données (meteoblue). Nous avons mis à disposition les glaciers du Grand désert et de la Corbassière.
+	Pour ce rapport, nous allons uniquement présenter les résultats et analyses du glacier d'Aletsch.</p>
+    <div><img alt="photo du glacier d'Aletsch en été" src="glacier_aletsch.jpg"></div>
+    <div style="color: #666; font-size: 13px">
+        Source: <a href="http://urlr.me/ygzDp">outdooractive</a>,
+        Glacier d'Aletsch
+    </div>
+	<p><br /><br /></p>
+    <h4>Modèle pour simulation</h4>
+    <p>Dans notre modèle de base, nous allons simplifier la forme du glacier par un parallélépipède. Nous gardons quand même les dimensions réelles, pour plus de réalisme. 
+    La zone d'accumulation de neige transformée en glace se trouve au dessus de la zone d'ablation où la glace fond plus vite qu'il neige.
+    La longueur des zones dépent de la température. Notre simulation dure 5 ans et prend des données de précipitation par jour. Nous reinitialisons la hauteur avec l'enneigement ou la pluie.
+    Le modèle de fonte est appliqué et nous recommençons chaque jours.</p>
+    <div><img alt="dessin" src="IMG_glacier2.jpg"height="350" width="500" align="right"></div>
+    <div><img alt="dessin" src="IMG_glacier1.jpg"height="350" width="500"></div>
+    
+    
+    <p><br /><br /></p>
+    
+    <h2>Résultats et analyses</h2>
+    <h3>Etude de la vitesse du glacier</h3>
+    <p>Les glaciers avancent selon la pente de la roche en dessous. Ces graphiques sont pertinents pour n'importe quel glacier. 
+    Le mode interactif directement sur le code python permet de choisir la pente et de voir la différence sur 5 ans.
+    Cette simulation de la vitesse dépend uniquement de la proximité avec la roche. 
+    Nous allons négliger le contact sur les bords du glacier. La vitesse est égale sur la largeur et la longueur.
+    Ainsi, la vitesse change selon la distance par rapport à la roche.
+    C'est pourquoi, nous pouvons mettre notre glacier à plat.<br /></p>
+    <p></p>
+    <p>La vitesse de la glace pour chaque hauteur z, est donnée par :<br /></p>
+    <center><strong>v(z) = V0 + 3600*24*b*z(2*H-z)</strong></center> 
+    <p>Avec : <br /><strong>V0 = 10 [m/an]<br />H = 900 [m] </strong>(épaisseur du glacier)<br /><strong> b = p*g*sin(alpha)/(2*n)<br />
+    p = 917 [kg/m^3]</strong> (masse volumique de la glace)<br /><strong>g = 9.81 [m/s^2]</strong> (accélération de pesenteur)<br /><strong>
+    alpha = pente </strong>(radians)<br /><strong>n = 10^14 [Pascal*s]</strong>(viscosité de la glace)
+    </p>
+    <p>On remarque que la vitesse ne dépend pas directement de la température. 
+    Cependant, l'épaisseur se modifie avec la chaleur et change par la suite sa vitesse.</p>
+   
+    <div><img alt="vitesse glacier avec une pente de 0.2" src="Figure_pente3.png" height="200" width="700"></div>
+    <p>Dans ce premier graphique, on voit en vert l'avancée de notre glacier selon la vitesse de base et la pente du glacier d'Aletsch.
+    En rouge, on observe l'état du glacier quand la glace s'effondre, lorsqu'elle ne peut plus être soutenue par la glace ou la roche en dessous.
+    Finalement, les deux courbes sont simplement inversement proportionnel. Ainsi, nous considérons cette forme comme étant la forme finale après 5 années.  
+    La courbe bleue serait l'avancement du glacier avec une pente de 0.2 qui est une pente moyenne de certains passsages clé pour un glacier typique.
+    <br /><br />Avec une pente nulle, le glacier avance avec une vitesse d'environ 10m/an. 
+    Ceci est due à la fonte de la glace sur le sol rocheux qui la fait avancer. On peut donc deviner son deplacement au pied du trait vert.</p>
+
+    <div><img alt="vitesse glacier avec une pentede 0.5" src="Figure_pente2.png" height="200" width="700"></div>
+    <p>Ici, nous observons une pente que nous considérons comme très élevée et presque maximum. 
+    Elle a une valeur de 0.5 et uniquement peu de passages de la glace ont cette pente</p> 
+	<p></p>
+    <p>Grâce à ces graphique nous anaylsons comment la pente affecte l'avancée du glacier. 
+    Dans un cas où la pente est plus forte sur le front du glacier, l'épaisseur sera plus fine et fondra plus vite.
+    Ce modèle de vitesse montre la distance (en abscisse) où le glacier s'étend selon la pente (finale) et les années.
+    Selon le terrain sous le glacier et la distance avec la roche, les champs de vitesse inégales provoqueraient des crevasses.
+    Si nous connaissons précisément ces données, nous pouvons estimer l'endroit où les crevasses se formeraient.<br /><br /></p>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <h3>Différence des températures entre 1985 et 2016</h3>
+    <p>Mettre en graphique les deux époques permet de comparer l'évolution de température en 30 ans et ensuite comprendre d'où vient la fonte.
+    Pour plus de visibilité, nous faisons une moyenne par mois sur les cinq années. 
+    Pour garder un esprit critique et plus de précision, nous avons en dessous le graphique avec une moyenne par semaine.
+    De ce faite, nous voyons que les températures peuvent monter au dessus du 0°C.
+    En abscisse nous avons les jours et en ordonnée la température du sommet du glacier, donné en Kelvin.</p>
+    
+    <div><img alt="différences de temprératures entre 1985 et 2016" src="Figure_temperatures.png" height="300" width="700"></div>
+    <div><img alt="différences de temprératures entre 1985 et 2016" src="Figure_temperatures2.png" height="300" width="700"></div>
+    <p>On observe des différences trop légères pour présenter une réelle augmentation de la température. 
+    Or, le graphique en 2016 montre des température plus ample donc plus extrême. 
+    On remarque que les étés en 2016 sont plus long, car en général, au niveau de la courbe en été, la courbe bleue est plus large que celle en orange.
+    Selon les températures et les précipitation nous pouvons facilement voir l'évolution à l'aide des graphiques suivant.</p>
+    
+    
+    
+    
+    
+    
+    
+    <h3>Modèle d'accumulation et d'ablation</h3>
+    <p>Grâce à ce graphique, nous pouvons observer un maximum d'éléments et comprendre certains phénomènes.
+    Nous pouvons voir le glacier avec sa taille réelle le long du lit rocheux.</p>
+    <div><img alt="" src="Figure_glacier1.png" height="100" width="800"></div>
+    <p>Si on agrandit l'image, on voit l'évolution du glacier avec sa vitesse selon sa pente moyenne.
+    La courbe rouge montre le glacier qui s'est effondré sous le poids de la glace.
+    Le volume perdu dans le décalage du glacier est gagné avec l'accumulation en haut du glacier.
+	Ainsi, si on calcul le volume totale sous la courbe rouge (avec la largeur) on ne ferait que d'augementer.
+	Nous ne considérons pas le modèle de fonte sur la partie effondrée.
+    L'effondremet est très imprévisible et selon sa forme,
+	trop de paramètres entrent en jeu pour réussir à faire une approximation.
+	Ici, notre modèle veut surtout étudier la différence de volume le long du glacier.
+	</p>
+	<div><img alt="" src="Figure_glacier2.png" height="300" width="300"></div>
+	<p>La courbe bleue claire représente le glacier initial. Nous observons la courbe bleue et rouge qui se superposent.
+	La bleue vient de la fonte à cause des présipitation lorsque la température est au dessus de 0°C.
+	On voit une différence d'environ 4 mètres sur la partie basse du glacier.</p>
+	<div><img alt="" src="Figure_glacier3.png" height="200" width="600"></div>
+	<p>Tandis que nous avons uniquement une augementation de 10 mètres au point le plus haut.</p>
+	<div><img alt="" src="Figure_glacier5.png" height="300" width="400"></div>
+	<p>Pour ce dernier graphique, nous avons utilisé une formule physique pour analyser le comportement de la fonte selon la chaleur en surface.
+	La formule qui suit prend les données d'enneigements à chaque colonne d'épaisseur, applique le modèle de fonte et recommence chaque jour pour les cinq années.
+	<center><strong>H(x, t) = (H(x, t-1)^2 - (2*Ct*(Ts(x, t-1)-Tr)*3600*24)/(p*CL))^(1/2)</strong></center>
+	<p>Avec: <br /><strong>H</strong> (hauteur en mètre d'une colonne x au temps t)<br /><strong>Ts</strong> (température en Kelvin d'une colonne x au temps t)<br />
+	<strong>Ct = 2.215 [W/(m*K)] </strong>(conductivité thermique)<br /><strong>Tr = 273 [K]<br />p = 917 [kg/m^3]<br />
+	Cl = 3.3 * 10^5 [J/g] </strong>(chaleur latente)<br /></p>
+	On voit une légère fonte, négligeable à côté de celle des pluies, dû à la faible quantité de température au dessus de 0°C.
+	On le remarque sur le graphique des températures(1.2). La fonte est de l'ordre de 0.005 mètre au maximum, soit à la base du glacier</p>
+    <div><img alt="" src="Figure_glacier4.png" height="300" width="900"></div>
+
+
+    <h4>Visualisation en 3D</h4>
+	<div><img alt="glacier 3D initial" src="Figure_glacier3d2.png" height="450" width="900"></div>
+    <div><img alt="glacier 3D après 5 ans" src="Figure_glacier3d1.png" height="450" width="900"></div>
+    <h2>Calculs et scénario</h2>
+    <p>Selon le modèle de base sur python, le volume du glacier diminue de: 2.703 * 10^10 [m^3] à 2.699 * 10^10 [m^3], 
+    la masse totale du glacier diminue de: 2.479 3 10^13 [Kg] à 2.475 * 10^13 [Kg], ce qui correspond à une baisse de: 0.00162% sur 5 années.
+	Nous avons fait un scénario qui simule aussi la fonte du même glacier environ 80 ans plus tard, 
+	avec des températures qui devrait augementer et des vagues de chaleurs plus longues et plus intenses
+	Le débit moyen est de: 29581.28 [m^3/j], le débit moyen de notre scénario est de: 148967.72 [m^3], 
+	soit une augementation de 5.03%.
+	Mettons un lac de 15,5m de profondeur et une superficie de 3,2 [km^2], ces dimensions sont prises pour un lac moyen de glacier.
+	En considérant comme unique affluent l'eau venant des glaciers, le niveau du lac augemente de 6.81 [m] au bout de 5ans.
+	Le volume final, avec le scénario est de: 2.677 * 10^10 [m^3], il y a donc une diminution de 0.00968%. 
+	Soit 2.18 * 10^10 [m^3] de moins que selon notre modèle de base</p>
+    
+    
+    <h2>Conclusion</h2>
+    <p>Nous avons pu observer...</p>
+    
+    <p>Van der Bruggen Gaetan, Bojaly Alberto</p>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
