@@ -257,6 +257,9 @@ int main(){
     
     Fichiercsv("Vale.csv", difference_scen, L_incr, 1);
 	free(Valeursdiff);
+    double niveau = niveau_lac(5*366, moyenne_debit_jours, 32000000, 15.5, tps);
+    double delta_niveau = 15.5-niveau; 
+    printf("Admettons qu'il y ai un lac de 15,5m de profondeur et une superficie de 3,2km^2, en considérant comme unique affluent l'eau venant des glaciers,la différence de niveau est de %f m en 5ans", delta_niveau);
     
     return 0;
 }

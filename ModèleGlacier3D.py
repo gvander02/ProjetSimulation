@@ -21,8 +21,35 @@ from matplotlib.widgets import Slider
 
 
 # recuperer les donnees necessaires a notre simulation du fichier meteoblue json
-fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
+#fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
 fichiers1985 = ["aletsch1985.json","aletsch1986.json","aletsch1987.json","aletsch1988.json","aletsch1989.json"]
+glacier = input("Entrer un des glaciers entre aletsch, rosablanche (Glacier du Grand Désert) et grand_combin (Glacier Corbassière): ")
+if glacier == "aletsch":
+    H = 900  
+    P = 0.05
+    L_incr = 2000
+    L = 20000 
+    Larg = 1500
+    fichiers1985 = ["aletsch1985.json","aletsch1986.json","aletsch1987.json","aletsch1988.json","aletsch1989.json"]
+    fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
+if glacier == "rosablanche":
+    H = 500  
+    P = 0.03
+    L_incr = 250
+    L = 2500 
+    Larg = 1000
+    fichiers1985 = ["rosablanche1985.json", "rosablanche1986.json","rosablanche1987.json", "rosablanche1988.json", "rosablanche1989.json"]
+    fichiers = ["rosablanche2016.json", "rosablanche2017.json","rosablanche2018.json", "rosablanche2019.json", "rosablanche2020.json"]
+if glacier == "grand_combin":
+    H = 600  
+    P = 0.08
+    L_incr = 1000
+    L = 10000
+    Larg = 1800
+    fichiers1985 = ["grand_combin1985.json", "grand_combin1986.json","grand_combin1987.json", "grand_combin1988.json", "grand_combin1989.json"]
+    fichiers = ["grand_combin2016.json", "grand_combin2017.json","grand_combin2018.json", "grand_combin2019.json", "grand_combin2020.json"]
+else: 
+    print("Vérifiez si le nom que vous avez entré est bien en minuscules, si oui nous n'avons pas les données pour ce glacier")
 
 def telecharger(dossier):
     with open(dossier, "r") as donnees_initiales:
@@ -69,13 +96,9 @@ for i in range(len(fichiers1985)):
     dictionnaire(fichiers1985[i], donnees_finales1985)
 
 # Dimension glacier----------------------------------------------------------//
-H = 900  # float(input("Quelle est l'épaisseur du glacier?"))
-P = 0.05# float(input("Quelle est la pente moyenne du glacier? En pourcentage"))/100
-L_incr = 2000 #précision de nos calcul -> pour une précision maximum L_incr = L (trop de calculs)
-L = 20000  # int(input("Quelle est la longueur du glacier?"))#distance entre le sommet et le front du glacier sans compter l'altitud
-Larg = 1500  # int(input("Quelle est la largeur du glacier?"))
 tps = len(donnees_finales['temperature'])  # float(input("Temps de la simulation (en jour)"))
 tps1985 = len(donnees_finales1985['temperature'])
+# Dimension glacier------------------------------------------------------------------------------------------- 
 Alt = Calculalt["altitude"]# on suppose que le point des données est le sommet du glacier
 alpha = math.atan(P)  # radians
 BaseG = Alt - P*L
