@@ -13,11 +13,15 @@
     <h1><center>Modélisation de l'évolution d'un glacier</center></h1>
     <p>		Un glacier est une accumulation de glace le long d'une vallée.
 Il se forme grâce aux couches de neige qui viennent se superposer.
-Écrasée sous son propre poids, la neige se compact et rejete les substances gazeuses.
-Ainsi, elle se soude en une masse dense et homogène pour se transformer en glace. Les glaciers sont des reserves primordiales en eau douce. De nos jours, ils sont le sujet de nombreuses discussions.
-C'est pourquoi, nous avons décidé de modéliser comment et à quelle vitesse un glacier des alpes devrait fondre...</p>
-	<p> Pour ce faire, nous observons le glacier d'Aletsch qui est le plus grand et le plus emblématique des alpes.
-	 5ans. dimension réelles.</p>
+Écrasée sous son propre poids, la neige se compact et rejette les substances gazeuses.
+Ainsi, elle se soude en une masse dense et homogène pour se transformer en glace. Les glaciers sont des réserves primordiales en eau douce. De nos jours, ils sont le sujet de nombreuses discussions.
+C'est pourquoi, nous avons décidé de modéliser comment et à quelle vitesse un glacier des alpes devrait fondre...
+Un glacier est en mouvement constant, nous avons donc aussi modélisé et estimé sa vitesse. </p>
+	<p> Pour ce faire, nous observons les comportements de trois glaciers: Aletsch, la Rosablanche, et le Grand Combin. Nous avons utilisé les données du site MeteoBlue, qui nous a fourni les précipitations et les températures par heures au sommet du glacier. 
+        Nous avons converti l'unité temporelle en jour, évalué l'évolution du glacier pour 5 ans sur les dimensions réelles (la longueur et l'épaisseur du glacier étudié). Nous avons généralisé les données de météoblue pour tout le glacier étudié en faisant la 
+        simplification que la température de la neige et l'épaisseur du glacier est la même pour toute la largeur de ce dernier. Effectivement nous avons considéré que la température de surface augmentait de 6,5 degrés par km vers le bas. 
+        Les précipitations lorsque la température était inférieure à 273 Kelvin sont considérées comme de la neige et lorsque qu'elles sont supérieur commme de la pluie.
+        </p>
     <div><img alt="photo du glacier d'Aletsch en été" src="glacier_aletsch.jpg"></div>
     <div style="color: #666; font-size: 13px">
         Source: <a href="http://urlr.me/ygzDp">outdooractive</a>,
@@ -27,7 +31,7 @@ C'est pourquoi, nous avons décidé de modéliser comment et à quelle vitesse u
     <h4>Modèle pour simulation</h4>
     <p>Dans notre modèle de base, nous allons simplifier la forme du glacier par un parallélépipède. 
     La zone d'accumulation de neige transformée en glace se trouve au dessus de la zone d'ablation où la glace fond plus vite qu'il neige.
-    La longueur des zones dépent de la température.</p>
+    La longueur des zones dépend de la température.</p>
     <div><img alt="dessin" src="IMG_glacier2.jpg"height="350" width="500" align="right"></div>
     <div><img alt="dessin" src="IMG_glacier1.jpg"height="350" width="500"></div>
     
