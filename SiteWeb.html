@@ -15,10 +15,12 @@
 	Il se forme grâce aux couches de neige qui viennent se superposer.
 	Écrasée sous son propre poids, la neige se compact et rejete les substances gazeuses.
 	Ainsi, elle se soude en une masse dense et homogène pour se transformer en glace. Les glaciers sont des reserves primordiales en eau douce. De nos jours, ils sont le sujet de nombreuses discussions.
-	C'est pourquoi, nous avons décidé de modéliser comment et à quelle vitesse un glacier des alpes devrait fondre...</p>
+	C'est pourquoi, nous avons décidé de modéliser comment et à quelle vitesse un glacier des alpes devrait fondre.
+	Un glacier est en mouvement constant, nous avons donc aussi modélisé et estimé sa vitesse.</p>
 	<p> Pour ce faire, nous observons le glacier d'Aletsch qui est le plus grand et le plus emblématique des alpes.
 	Le code utilisé fonctionne pour n'importe quel glacier, avec ses dimensions et ses données (meteoblue). Nous avons mis à disposition les glaciers du Grand désert et de la Corbassière.
 	Pour ce rapport, nous allons uniquement présenter les résultats et analyses du glacier d'Aletsch.</p>
+
     <div><img alt="photo du glacier d'Aletsch en été" src="glacier_aletsch.jpg"></div>
     <div style="color: #666; font-size: 13px">
         Source: <a href="http://urlr.me/ygzDp">outdooractive</a>,
@@ -29,7 +31,10 @@
     <p>Dans notre modèle de base, nous allons simplifier la forme du glacier par un parallélépipède. Nous gardons quand même les dimensions réelles, pour plus de réalisme. 
     La zone d'accumulation de neige transformée en glace se trouve au dessus de la zone d'ablation où la glace fond plus vite qu'il neige.
     La longueur des zones dépent de la température. Notre simulation dure 5 ans et prend des données de précipitation par jour. Nous reinitialisons la hauteur avec l'enneigement ou la pluie.
-    Le modèle de fonte est appliqué et nous recommençons chaque jours.</p>
+    Nous avons généralisé les données de météoblue pour tout le glacier étudié en faisant la simplification que la température, les précipitations et l'épaisseur du glacier est la même pour toute la largeur de ce dernier.
+    Le modèle de fonte est appliqué et nous recommençons chaque jours. Nous avons considéré que la température de surface augmentait de 6,5 degrés par km de dénivelé négatif.
+    Lorsque la température était inférieure à 273 Kelvin, les précipitation sont considérées comme de la neige avec un coefficient de 10.
+    Si elles sont supérieur la pluie fait fondre notre glacier.</p>
     <div><img alt="dessin" src="IMG_glacier2.jpg"height="350" width="500" align="right"></div>
     <div><img alt="dessin" src="IMG_glacier1.jpg"height="350" width="500"></div>
     
@@ -136,16 +141,16 @@
 	<div><img alt="glacier 3D initial" src="Figure_glacier3d2.png" height="450" width="900"></div>
     <div><img alt="glacier 3D après 5 ans" src="Figure_glacier3d1.png" height="450" width="900"></div>
     <h2>Calculs et scénario</h2>
-    <p>Selon le modèle de base sur python, le volume du glacier diminue de: 2.703 * 10^10 [m^3] à 2.699 * 10^10 [m^3], 
-    la masse totale du glacier diminue de: 2.479 3 10^13 [Kg] à 2.475 * 10^13 [Kg], ce qui correspond à une baisse de: 0.00162% sur 5 années.
-	Nous avons fait un scénario qui simule aussi la fonte du même glacier environ 80 ans plus tard, 
-	avec des températures qui devrait augementer et des vagues de chaleurs plus longues et plus intenses
-	Le débit moyen est de: 29581.28 [m^3/j], le débit moyen de notre scénario est de: 148967.72 [m^3], 
-	soit une augementation de 5.03%.
+    <p>Selon le modèle de base sur python, le volume du glacier diminue de: <strong>2.703 * 10^10 [m^3]</strong> à <strong>2.699 * 10^10 [m^3]</strong>, 
+    la masse totale du glacier diminue de: <strong>2.479 * 10^13 [Kg]</strong> à <strong>2.475 * 10^13 [Kg]</strong>, ce qui correspond à une baisse de: <strong>0.00162%</strong> sur 5 années.
+	<br />Nous avons fait un scénario qui simule aussi la fonte du même glacier environ 80 ans plus tard, 
+	avec des températures qui devrait augementer et des vagues de chaleurs plus longues et plus intenses.<br />
+	Le débit moyen est de: <strong>29581.28 [m^3/j]</strong>, le débit moyen de notre scénario est de: <strong>148967.72 [m^3]</strong>, 
+	soit une augementation de <strong>5.03%</strong>.
 	Mettons un lac de 15,5m de profondeur et une superficie de 3,2 [km^2], ces dimensions sont prises pour un lac moyen de glacier.
-	En considérant comme unique affluent l'eau venant des glaciers, le niveau du lac augemente de 6.81 [m] au bout de 5ans.
-	Le volume final, avec le scénario est de: 2.677 * 10^10 [m^3], il y a donc une diminution de 0.00968%. 
-	Soit 2.18 * 10^10 [m^3] de moins que selon notre modèle de base</p>
+	En considérant comme unique affluent l'eau venant des glaciers, le niveau du lac augemente de <strong>6.81 [m]</strong> au bout de 5ans.<br />
+	Le volume final, avec le scénario est de: <strong>2.677 * 10^10 [m^3]</strong>, il y a donc une diminution de <strong>0.00968%</strong>. 
+	Soit <strong>2.18 * 10^10 [m^3]</strong> de moins que selon notre modèle de base</p>
     
     
     <h2>Conclusion</h2>

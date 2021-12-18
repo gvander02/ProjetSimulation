@@ -18,33 +18,35 @@ import math
 import json
 import csv
 from matplotlib.widgets import Slider
+import matplotlib.animation as animation
+
 
 
 # recuperer les donnees necessaires a notre simulation du fichier meteoblue json
-glacier = input("Entrer un des glaciers entre aletsch, rosablanche (Glacier du Grand Désert) et grand_combin (Glacier Corbassière): ")
-if glacier == "aletsch":
+glacier = input("Entrez un des glaciers entre Aletsch, Rosablanche (Glacier du Grand Désert) et Grand Combin (Glacier Corbassière): ")
+if glacier == "Aletsch":
     H = 900  
     P = 0.05
     L = 20000 
     Larg = 1500
     fichiers1985 = ["aletsch1985.json","aletsch1986.json","aletsch1987.json","aletsch1988.json","aletsch1989.json"]
     fichiers = ["aletsch2016.json", "aletsch2017.json","aletsch2018.json", "aletsch2019.json", "aletsch2020.json"]
-elif glacier == "rosablanche":
+elif glacier == "Rosablanche":
     H = 500  
-    P = 0.03
+    P = 0.08
     L = 2500 
     Larg = 1000
     fichiers1985 = ["rosablanche1985.json", "rosablanche1986.json","rosablanche1987.json", "rosablanche1988.json", "rosablanche1989.json"]
     fichiers = ["rosablanche2016.json", "rosablanche2017.json","rosablanche2018.json", "rosablanche2019.json", "rosablanche2020.json"]
-elif glacier == "grand_combin":
+elif glacier == "Grand Combin":
     H = 600  
-    P = 0.08
+    P = 0.1
     L = 10000
     Larg = 1800
     fichiers1985 = ["grand_combin1985.json", "grand_combin1986.json","grand_combin1987.json", "grand_combin1988.json", "grand_combin1989.json"]
     fichiers = ["grand_combin2016.json", "grand_combin2017.json","grand_combin2018.json", "grand_combin2019.json", "grand_combin2020.json"]
 else: 
-    print("Vérifiez si le nom que vous avez entré est bien en minuscules, si oui nous n'avons pas les données pour ce glacier")
+    print("Vérifiez que le nom est bien écrit, si oui nous n'avons pas les données pour ce glacier")
 
 def telecharger(dossier):
     with open(dossier, "r") as donnees_initiales:
@@ -178,7 +180,7 @@ s_factor.on_changed(update)
 #fig.savefig('Figure_1.jpeg')
     
 #Modele d'enneigement, Accumulation. Modele de fonte, Ablation---------------------------------------------------//
-Coeff = 0.0001  # coeff d'enneigement par rapport à l'altitude (plus réaliste)
+Coeff = 0.005  # coeff d'enneigement par rapport à l'altitude (plus réaliste)
 dp = int(deplacement2[-2])
 dp1 = int(deplacement12[-2])
 BaseGfinal = BaseG - P*(deplacement12[-1]-L)
@@ -247,8 +249,10 @@ for i in range(L_incr):
     E1985.append(1.0)
     
 htt = []
+htt1985 = []
 for i in range(L_incr):
-    htt.append(H)
+    htt.append(H+E[i])
+    htt1985.append(H+E[i])
 #Fonction Accumulation et Ablation--------------------------------------------------// 
 '''
 Nous ne considérons pas le modèle de fonte sur la partie effondrée
@@ -258,43 +262,48 @@ trop de paramètres rentrent en jeu pour réussir à faire une faible approximat
 Notre modèle veut surtout étudier la différence de volume le long du glacier.
 '''    
 nbrsj = 4 #nbrs jour pour transformer en glace:
-def evolution(precipitation, temperatures, enneigement, temps):
+def evolution(precipitation, temperatures, enneigement, temps, hauteurtempst):
     for i in range(temps-nbrsj):
         for j in range(L_incr):
             if temperatures[i][j] <= 273:
-                valeur = precipitation[i]/10 + enneigement[j] - Coeff*P*j*delta #max de 0.1m pour L = 20000
+                valeur = precipitation[i]/10 + enneigement[j] - Coeff*P*j*delta*precipitation[i]/10 #max de 0.1m pour L = 20000
                 if valeur > 0:
+                    hauteurtempst[j] += valeur - enneigement[j]
                     del enneigement[j]
                     enneigement.insert(j, valeur)
+            
             else:
                 valeur = enneigement[j] - precipitation[i]/10
                 del enneigement[j]
                 enneigement.insert(j, valeur)
                 #Ablation
-                hauteur = (htt[j] - precipitation[i]/10)**(2) - (2*Ct*(Ts[i][j]-Tr)*3600*24)/(p*CL)
+                hauteur = (hauteurtempst[j] - precipitation[i]/10)**(2) - (2*Ct*(temperatures[i][j]-Tr)*3600*24)/(p*CL)
                 fonte = hauteur**(1/2)
-                del htt[j]
-                htt.insert(j, fonte)
+                del hauteurtempst[j]
+                hauteurtempst.insert(j, fonte)
                     
     for i in range(nbrsj):
         for j in range(L_incr):
             if temperatures[i][j] <= 273:
-                valeur = precipitation[temps-nbrsj+i] + enneigement[j] - Coeff*P*j*delta
+                valeur = precipitation[temps-nbrsj+i] + enneigement[j] - Coeff*P*j*delta*precipitation[i]/10
                 if valeur > 0:
+                    hauteurtempst[j] += valeur - enneigement[j]
+                    
                     del enneigement[j]
                     enneigement.insert(j, valeur)
+
             else:
                 valeur = enneigement[j] - precipitation[i]/10
                 del enneigement[j]
                 enneigement.insert(j, valeur)
                 #Ablation
-                hauteur = (htt[j] - precipitation[i]/10)**(2) - (2*Ct*(Ts[i][j]-Tr)*3600*24)/(p*CL)
+                hauteur = (hauteurtempst[j] - precipitation[i]/10)**(2) - (2*Ct*(temperatures[i][j]-Tr)*3600*24)/(p*CL)
                 fonte = hauteur**(1/2)
-                del htt[j]
-                htt.insert(j, fonte)
+                del hauteurtempst[j]
+                hauteurtempst.insert(j, fonte)
                     
-evolution(Valeursprecipitation, Ts, E, tps)
-#neige(Valeursprecipitation1985, Ts1985, E1985, tps1985)
+evolution(Valeursprecipitation, Ts, E, tps, htt)
+evolution(Valeursprecipitation1985, Ts1985, E1985, tps1985, htt1985)
 
 #Graphique 2D----------------------------------------------------------------//
 '''
@@ -316,6 +325,7 @@ for i in range(L_incr):
     Varneige.append(E[i]+VraiZ[i])
     Varneige1985.append(E1985[i]+VraiZ[i])
     htt[i] = htt[i] - H + VraiZ[i]
+    htt1985[i] = htt1985[i] - H + VraiZ[i]
 
 Pentefinal = (htt[-2]-htt[-1])/delta
 PenteF = math.atan(Pentefinal) # en radians
@@ -356,10 +366,12 @@ plt.plot(xxx1, ht, label="Glacier au temps t", color="red")
 plt.plot(deplacement1, yyy1, color="red")
 plt.plot(deplacement, yyy, ':', label = f'glacier après {tps} jours', color="green")
 plt.plot(xxx2, pente_v, ':', color = 'green')
-#plt.plot(xx, Varneige1985, label="Enneigement en 1985", color='violet')
+plt.plot(xx, Varneige1985, label="Enneigement en 1985", color='orange')
+plt.plot(xx, htt1985, color='violet')
 plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
 plt.legend()
+
 
 
 # Graphique 3D---------------------------------------------------------------//
@@ -418,17 +430,25 @@ yyy1 = np.linspace(100, Larg+100, Larg)
 yyy2 = np.linspace(BaseR-haut, pente_v[-1], H-1)
 YYY1, YYY2 = np.meshgrid(yyy2, yyy1)
 
-fig = plt.figure()
-ax = plt.axes(projection='3d')
+fig, ax = plt.subplots(subplot_kw=dict(projection='3d'))
 ax.set_xlim(0, L + 500)
 ax.set_ylim(-300, Larg + 300)
 ax.set_zlim(BaseR-200, Alt+100)
 tailleR = 0.5
 tailleG = 2
 ax.plot_wireframe(X1, X2, Zr, tailleR, color='black')
-ax.plot_wireframe(XX1, XX2, Zg, tailleG, color='lightblue')
+ax.plot_wireframe(XX1, XX2, Zg, tailleR, color='lightblue')
 ax.plot_wireframe(XXX1, XXX2, Zgt, tailleG, color='red')
 ax.plot_wireframe(Zgt2, YYY2, YYY1, tailleG, color='red')
+ax.plot_surface(XX1, XX2, Zg, linewidth=0, shade=False)
+ax.view_init(elev=10, azim=0)
+
+def init():
+	pass
+def animate(i):
+	ax.view_init(elev=10, azim=i)
+anim = animation.FuncAnimation(fig, animate, init_func=init, frames=360, interval=1, blit=False, repeat=True)
+#ax = plt.axes(projection='3d')
 plt.show()
 
 # Envoyer les données csv pour le calcul en C.-------------------------------//
