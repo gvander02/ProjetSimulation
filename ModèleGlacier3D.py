@@ -266,7 +266,7 @@ def evolution(precipitation, temperatures, enneigement, temps, hauteurtempst):
     for i in range(temps-nbrsj):
         for j in range(L_incr):
             if temperatures[i][j] <= 273:
-                valeur = precipitation[i]/10 + enneigement[j] - Coeff*P*j*delta*precipitation[i]/10 #max de 0.1m pour L = 20000
+                valeur = precipitation[i]/10 + enneigement[j] - Coeff*P*j*delta*precipitation[i]/10
                 if valeur > 0:
                     hauteurtempst[j] += valeur - enneigement[j]
                     del enneigement[j]
@@ -288,7 +288,6 @@ def evolution(precipitation, temperatures, enneigement, temps, hauteurtempst):
                 valeur = precipitation[temps-nbrsj+i] + enneigement[j] - Coeff*P*j*delta*precipitation[i]/10
                 if valeur > 0:
                     hauteurtempst[j] += valeur - enneigement[j]
-                    
                     del enneigement[j]
                     enneigement.insert(j, valeur)
 

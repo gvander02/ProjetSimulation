@@ -186,7 +186,6 @@ double niveau_lac(int jours, double debiti, double debitf, double surface, doubl
 			volume = volume - 1*effluent;
 		}
 		niveau = niveau_f;
-		printf("%f,  %f, %f\n\n", affluent, effluent, volume);
 	}
     return niveau;
 }
@@ -246,7 +245,7 @@ int main(){
     
     // somme des diff et diviser par nb de jours donne la moyenne
     double niveau = niveau_lac(tps, moyenne_debit_jours, debit_scen, 3200000, 15);
-    double delta_niveau = niveau - 15.5; 
+    double delta_niveau = niveau - 15; 
     printf("Admettons un lac de 15 m de profondeur et une superficie de 3,2km^2, Ces dimensions sont prises pour un lac moyen de glacier."); 
     printf("En considerant comme unique affluent l'eau venant des glaciers, le niveau du lac augementerait de %f m en 2100, selon le scenario.\n\n", delta_niveau);
     
