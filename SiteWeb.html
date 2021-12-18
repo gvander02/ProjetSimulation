@@ -18,9 +18,7 @@ Ainsi, elle se soude en une masse dense et homogène pour se transformer en glac
 C'est pourquoi, nous avons décidé de modéliser comment et à quelle vitesse un glacier des alpes devrait fondre...
 Un glacier est en mouvement constant, nous avons donc aussi modélisé et estimé sa vitesse. </p>
 	<p> Pour ce faire, nous observons les comportements de trois glaciers: Aletsch, la Rosablanche, et le Grand Combin. Nous avons utilisé les données du site MeteoBlue, qui nous a fourni les précipitations et les températures par heures au sommet du glacier. 
-        Nous avons converti l'unité temporelle en jour, évalué l'évolution du glacier pour 5 ans sur les dimensions réelles (la longueur et l'épaisseur du glacier étudié). Nous avons généralisé les données de météoblue pour tout le glacier étudié en faisant la 
-        simplification que la température de la neige et l'épaisseur du glacier est la même pour toute la largeur de ce dernier. Effectivement nous avons considéré que la température de surface augmentait de 6,5 degrés par km vers le bas. 
-        Les précipitations lorsque la température était inférieure à 273 Kelvin sont considérées comme de la neige et lorsque qu'elles sont supérieur commme de la pluie.
+        Nous avons donc évalué l'évolution du glacier pour 5 ans avec les dimensions réelles (la longueur et l'épaisseur du glacier étudié). 
         </p>
     <div><img alt="photo du glacier d'Aletsch en été" src="glacier_aletsch.jpg"></div>
     <div style="color: #666; font-size: 13px">
@@ -31,7 +29,10 @@ Un glacier est en mouvement constant, nous avons donc aussi modélisé et estim�
     <h4>Modèle pour simulation</h4>
     <p>Dans notre modèle de base, nous allons simplifier la forme du glacier par un parallélépipède. 
     La zone d'accumulation de neige transformée en glace se trouve au dessus de la zone d'ablation où la glace fond plus vite qu'il neige.
-    La longueur des zones dépend de la température.</p>
+    La longueur des zones dépend de la température. Nous avons généralisé les données de météoblue pour tout le glacier étudié et avons fait la  
+    simplification que la température de la neige et l'épaisseur du glacier est la même pour toute la largeur de ce dernier. Effectivement nous avons considéré 
+    que la température de surface augmentait de 6,5 degrés par km vers le bas. Les précipitations lorsque la température était inférieure à 273 Kelvin 
+    sont considérées comme de la neige et lorsque qu'elles sont supérieur à 273 Kelvin commme de la pluie.</p>
     <div><img alt="dessin" src="IMG_glacier2.jpg"height="350" width="500" align="right"></div>
     <div><img alt="dessin" src="IMG_glacier1.jpg"height="350" width="500"></div>
     
@@ -137,7 +138,10 @@ Un glacier est en mouvement constant, nous avons donc aussi modélisé et estim�
     <h4>1.3.1 Visualisation en 3D</h4>
 	<div><img alt="glacier 3D initial" src="Figure_glacier3d2.png" height="450" width="900"></div>
     <div><img alt="glacier 3D après 5 ans" src="Figure_glacier3d1.png" height="450" width="900"></div>
-    <p>Van der Bruggen Gaetan, Bojaly Alberto</p>
+    <p>En conclusion, nous pouvons voir qu'en vue des simplifications que nous avons fait, nous obtenons des résultats de simulations cohérants. 
+        Cependant nous voyons la limite de notre modèle, notamment pour le modèle de fonte où nous observons une fonte très faible (environ 30-40cm en 5ans)
+        ce qui est largement en dessous de nos attente. </p>
+    <p>Van der Bruggen Gaétane, Bojaly Alberto</p>
 </body>
 
 </html>
