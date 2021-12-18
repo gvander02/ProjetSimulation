@@ -105,7 +105,7 @@ _Bool scenario_temp2(double * temperature_scenario, int tps){
     return true;
 }
 
-_Bool modele_fonte(double * hauteur, double * temperature, int time, int l_incr, double pente, double * Hauteur, int H, double * precipitation){
+_Bool modele_fonte(double * hauteur, double * temperature, int time, int l_incr, double pente, double * Hauteur, int H, double * precipitation, int longueur){
 	// l'enneigement initial ne change pas lorsque la temperature change 
 	// donc on prend les valeurs de la hauteur calculee dans le code python 
 	// auquel on applique le modele de fonte pour calculer la hauteur finale
@@ -123,7 +123,12 @@ _Bool modele_fonte(double * hauteur, double * temperature, int time, int l_incr,
                 double diff= pow((hauteur[j]-pluie),2)-(2*Dt*(temperature_h[j]-Tr)*3600*24)/(p*cl);
                 double fonte = sqrt(diff);
                 hauteur[j]=fonte;
-            }
+            }else{
+				double valeur = precipitation[i]*10 - 0.0001*pente*j*longueur/l_incr;
+				if (valeur > 0){
+					hauteur[j] = hauteur[j] + valeur;
+				}
+			}
         }
     }
     for (int i = 0; i<l_incr; i++){
@@ -158,14 +163,31 @@ double MasseFinale(double tableau[], int l_incr, int longueur, int largeur, doub
 	return massevolumique*VolumeFinal(tableau, l_incr, longueur, largeur, pente, epaisseur);
 }
 
-double niveau_lac(int jours, double debit, double debit_scen, double surface, double niveau_i){
+double niveau_lac(int jours, double debiti, double debitf, double surface, double niveau_i){
     // evolution par jour du niveau du lac
     // nous avons mis des dimensions au hazard
+    double affluent = debitf;
+    double effluent = debiti;
     double niveau = niveau_i;
-    double affluent = debit_scen;
-    double effluent = debit;
-    double diff_volume = (affluent-effluent)*jours;
-    return niveau + diff_volume/surface;
+    double volume = surface*niveau_i;
+    int larg_riv = 4;
+    double h_i = 0.7; //hauteur de la rivière
+    double vitesse = effluent/(larg_riv*h_i); //distance de l'eau par jour
+    for (int i=0;i<jours;i++){
+		volume = volume + affluent*1;
+		double niveau_f = volume/surface;
+		double h_f = (niveau_f - niveau + h_i);
+		vitesse = vitesse * (h_f/h_i);
+		if (niveau_f > niveau_i){
+			effluent = h_f*larg_riv*vitesse;
+			volume = volume - 1*effluent;
+		}else{
+			effluent = h_f*larg_riv*vitesse;
+			volume = volume - 1*effluent;
+		}
+		niveau = niveau_f;
+	}
+    return niveau;
 }
 
 int main(){
@@ -193,7 +215,7 @@ int main(){
 	
 	printf("Selon le modele de base sur python, le volume du glacier diminue de: %.3em^3, a: %.3em^3, ", V, Vf);
 	printf("la masse totale du glacier diminue de: %0.3eKg3, a: %0.3eKg, ce qui correspond a une baisse de: %f%c sur 5 annees.\n\n", M, Mf, pourcentageM, 37);
-    printf("Nous avons fait un scenario qui simule aussi la fonte du meme glacier environ 80 ans plus tard,");
+    printf("Nous avons fait un scenario qui simule la fonte du meme glacier, pendant 5 ans, environ 80 ans plus tard,");
     printf(" avec des temperatures qui devrait augementer et des vagues de chaleurs plus longues et plus intenses\n\n");
     printf("Le debit moyen par jour est de: %0.2f m^3, ",moyenne_debit_jours);
     
@@ -215,16 +237,17 @@ int main(){
 		Hauteur[i]=Valeursdiff[1*L_incr+i];
     }
     // calculer la hauteur apres avoir applique le modele de fonte
-    modele_fonte(hauteur, temperature_scenario, tps, L_incr, P, Hauteur, H, precipitation);
+    modele_fonte(hauteur, temperature_scenario, tps, L_incr, P, Hauteur, H, precipitation, L);
     
 	double debit_scen = scenario_debit(L_incr, Larg, Hauteur, hauteur, Variation_neige, tps, L);
 	double pourcentageD = debit_scen/moyenne_debit_jours;
-    printf("le debit moyen de notre scenario par jour est de: %0.2f m^3, soit une augementation de %f%c.\n\n", debit_scen, pourcentageD, 37);
+    printf("le debit moyen de notre scenario par jour serait de: %0.2f m^3, soit une augementation de %f%c.\n\n", debit_scen, pourcentageD, 37);
     
     // somme des diff et diviser par nb de jours donne la moyenne
-    double niveau = niveau_lac(tps, moyenne_debit_jours, debit_scen, 32000000, 15.5);
+    double niveau = niveau_lac(tps, moyenne_debit_jours, debit_scen, 3200000, 15);
     double delta_niveau = niveau - 15.5; 
-    printf("Admettons qu'il y ai un lac de 15,5m de profondeur et une superficie de 3,2km^2, Ces dimensions sont prises pour un lac moyen de glacier. En considerant comme unique affluent l'eau venant des glaciers, le niveau du lac augemente de %f m en 5ans.\n\n", delta_niveau);
+    printf("Admettons un lac de 15 m de profondeur et une superficie de 3,2km^2, Ces dimensions sont prises pour un lac moyen de glacier."); 
+    printf("En considerant comme unique affluent l'eau venant des glaciers, le niveau du lac augementerait de %f m en 2100, selon le scenario.\n\n", delta_niveau);
     
     
     //tableau des differences avec le nouveau modele de fonte
@@ -235,8 +258,9 @@ int main(){
     double VolumeFinal_scen = VolumeFinal(difference_scen, L_incr, L, Larg, P, H);
     double pourcentageVs = 1-VolumeFinal_scen/V;
     double Vfs = Vf - VolumeFinal_scen;
-    printf("Le volume final, avec le scenario augementant la temperature et avec des vagues de chaleur, est de: %0.3em^3, il y a donc une diminution de %f%c.", VolumeFinal_scen, pourcentageVs, 37);
+    printf("Le volume final, avec le scenario augementant la temperature et avec des vagues de chaleur, serait de: %0.3em^3, il y a donc une diminution de %f%c.", VolumeFinal_scen, pourcentageVs, 37);
     printf(" Soit %0.2em^3 de moins que selon notre modele de base\n\n", Vfs);
-   	free(Valeursdiff); 
+   	free(Valeursdiff);
+   	free(values); 
     return 0;
 }
