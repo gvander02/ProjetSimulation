@@ -145,6 +145,7 @@ double niveau_lac(int jours, double debit, double surface, double niveau_i){
     }
 }
 int main(){
+    
 	int L = 20000;
 	int L_incr = 2000;
     int Larg = 1500;
@@ -201,7 +202,7 @@ int main(){
     double VolumeFinal_scen = VolumeFinal(difference_scen, L_incr, L, Larg, P, H);
     double pourcentageVs = VolumeFinal_scen/V;
     double pourcentageVfs = VolumeFinal_scen/Vf;
-    printf("Le volume final, avec le scenario augementant la temperature de maximum 3 degrees, est de: %0.3em^3, il y a donc une diminution de %f%c.", VolumeFinal_scen, pourcentageVs, 37);
+    printf("Le volume final, avec le scenario augmentant la temperature de maximum 3 degrees, est de: %0.3em^3, il y a donc une diminution de %f%c.", VolumeFinal_scen, pourcentageVs, 37);
     printf(" Soit %f%c de plus que selon notre modele de base\n", pourcentageVfs, 37);
     
     Fichiercsv("Vale.csv", difference_scen, L_incr, 4);
