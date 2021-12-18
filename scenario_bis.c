@@ -186,7 +186,7 @@ double niveau_lac(int jours, double debiti, double debitf, double surface, doubl
 			volume = volume - 1*effluent;
 		}
 		niveau = niveau_f;
-		printf("%f,  %f\n\n", affluent, effluent);
+		printf("%f,  %f, %f\n\n", affluent, effluent, volume);
 	}
     return niveau;
 }
