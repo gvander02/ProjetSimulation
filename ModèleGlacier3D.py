@@ -180,7 +180,7 @@ s_factor.on_changed(update)
 #fig.savefig('Figure_1.jpeg')
     
 #Modele d'enneigement, Accumulation. Modele de fonte, Ablation---------------------------------------------------//
-Coeff = 0.005  # coeff d'enneigement par rapport à l'altitude (plus réaliste)
+Coeff = 0.01  # coeff d'enneigement par rapport à l'altitude (plus réaliste)
 dp = int(deplacement2[-2])
 dp1 = int(deplacement12[-2])
 BaseGfinal = BaseG - P*(deplacement12[-1]-L)
