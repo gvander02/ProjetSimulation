@@ -13,10 +13,9 @@
     <h1><center>Modélisation de l'évolution d'un glacier</center></h1>
     <p>Un glacier est une accumulation de glace le long d'une vallée.
 	Il se forme grâce aux couches de neige qui viennent se superposer.
-	Écrasée sous son propre poids, la neige se compact et rejete les substances gazeuses.
+	Écrasée sous son propre poids, la neige se compacte et rejette les substances gazeuses.
 	Ainsi, elle se soude en une masse dense et homogène pour se transformer en glace. Les glaciers sont des reserves primordiales en eau douce. De nos jours, ils sont le sujet de nombreuses discussions.
-	C'est pourquoi, nous avons décidé de modéliser comment et à quelle vitesse un glacier des alpes devrait fondre.
-	Un glacier est en mouvement constant, nous avons donc aussi modélisé et estimé sa vitesse.</p>
+	C'est pourquoi, nous avons décidé de modéliser comment et à quelle vitesse un glacier des alpes devrait fondre, et puisqu'un glacier est en mouvement constant, nous avons donc aussi modélisé et estimé sa vitesse.</p>
 	<p> Pour ce faire, nous observons le glacier d'Aletsch qui est le plus grand et le plus emblématique des alpes.
 	Le code utilisé fonctionne pour n'importe quel glacier, avec ses dimensions et ses données (meteoblue). Nous avons mis à disposition les glaciers du Grand désert et de la Corbassière.
 	Pour ce rapport, nous allons uniquement présenter les résultats et analyses du glacier d'Aletsch.</p>
@@ -30,34 +29,34 @@
     <h4>Modèle pour simulation</h4>
     <p>Dans notre modèle de base, nous allons simplifier la forme du glacier par un parallélépipède. Nous gardons quand même les dimensions réelles, pour plus de réalisme. 
     La zone d'accumulation de neige transformée en glace se trouve au dessus de la zone d'ablation où la glace fond plus vite qu'il neige.
-    La longueur des zones dépent de la température. Notre simulation dure 5 ans et prend des données de précipitation par jour. Nous reinitialisons la hauteur avec l'enneigement ou la pluie.
+    La longueur des zones dépend de la température. Notre simulation dure 5 ans et prend des données de précipitation par jour. Nous réinitialisons la hauteur avec l'enneigement ou la pluie.
     Nous avons généralisé les données de météoblue pour tout le glacier étudié en faisant la simplification que la température, les précipitations et l'épaisseur du glacier est la même pour toute la largeur de ce dernier.
     Le modèle de fonte est appliqué et nous recommençons chaque jours. Nous avons considéré que la température de surface augmentait de 6,5 degrés par km de dénivelé négatif.
-    Lorsque la température était inférieure à 273 Kelvin, les précipitation sont considérées comme de la neige avec un coefficient de 10.
-    Si elles sont supérieur la pluie fait fondre notre glacier.</p>
+    Lorsque la température était inférieure à 273 Kelvin, les précipitations sont considérées comme de la neige avec un coefficient de 10.
+    Si elles sont supérieures la pluie fait fondre notre glacier.</p>
     <div><img alt="dessin" src="IMG_glacier2.jpg"height="350" width="500" align="right"></div>
     <div><img alt="dessin" src="IMG_glacier1.jpg"height="350" width="500"></div>
     
     <h4>Explication du code</h4>
     <p>Pour lancer le code, il faut d'abord lancer le code en python "ModèleGlacier3D.py" et ensuite celui en C "scenario_bis.c"</p>
 	<p>Notre code permet au début de choisir parmi un des trois glaciers dont nous avons les données météoblue. 
-	Ensuite, ces dernières sont télécharger grâce au fonction "télécharger" et nous récupérons uniquement les données nécessaires en créant un dictionnaire.
-	Il s'en suit l'initialisation de constance et valeur pour les futurs calculs. <br />Le premier graphique est celui du modèle pour comprendre la vitesse.
+	Ensuite, ces dernières sont téléchargées grâce à la fonction "télécharger" et nous récupérons uniquement les données nécessaires en créant un dictionnaire.
+	Il s'en suit l'initialisation des constantes et valeurs pour les futurs calculs. <br />Le premier graphique est celui du modèle pour comprendre la vitesse.
 	Nous devons définir la fonction et ensuite créer des listes et les implémenter dans le graphique. Les différentes listes sont utiles aussi pour la suite des graphiques.
-	Nous avons defini les caractéristique du graphique et installer un slider pour pouvoir modifier directement sur le graphique la pente sous le glacier.<br /><br />
-	Le deuxième graphique propose de comparer les température entre 1985 et 2016 sur les cinq années étudiée. Pour cela, nous préparons des listes avec les précipitations et températures pour faciliter les fonctions.
+	Nous avons defini les caractéristiques du graphique et installé un slider pour pouvoir modifier directement sur le graphique la pente sous le glacier.<br /><br />
+	Le deuxième graphique propose de comparer les températures entre 1985 et 2016 sur les cinq années étudiées. Pour cela, nous préparons des listes avec les précipitations et températures pour faciliter les fonctions.
 	Il est possible de modifier la précision avec la variable "Moy". Nous vous conseillons de voir avec une moyenne par semaine et par mois.<br /><br />
 	Le troisième graphique nous montre une coupe du glacier sur toute sa longueur. Nous devons prendre en compte l'enneigement et la fonte chaque jour.
-	Ici aussi nous initialisons plusieurs listes pour travailler dessus. La fonction évlution permet d'ajouter de la neige ou de la pluie selon les températures.
-	Le modèle de fonte agit uniquement si la température est inférieur à 0°C. Nous avons ensuite plusieurs calculs pour ajouter la vitesse du glacier et donc notre glacier final.
-	Tout cela nous donne des différentes information visible sur le graphique, avec un agrandissement parfois nécessaire.<br /><br />
-	Le dernier graphique montre la même chose que le précédent. Il permet d'avoir une visualisation en 3 dimensions. Nous devons uniquement initialiser les différents axes et transférer les liste en matrice numpy.
+	Ici aussi nous initialisons plusieurs listes pour travailler dessus. La fonction évolution permet d'ajouter de la neige ou de la pluie selon les températures.
+	Le modèle de fonte agit uniquement si la température est inférieure à 0°C. Nous avons ensuite plusieurs calculs pour ajouter la vitesse du glacier et donc notre glacier final.
+	Tout cela nous donne des différentes informations visibles sur le graphique, avec un agrandissement parfois nécessaire.<br /><br />
+	Le dernier graphique montre la même chose que le précédent. Il permet d'avoir une visualisation en 3 dimensions. Nous devons uniquement initialiser les différents axes et transférer les listes en matrice numpy.
 	Pour avoir un "cube nous devons modifier les bords pour qu'ils "arrivent au sol rocheux". Il y a une petite animation qui fait pivoter la figure pour ne pas devoir utiliser la souris, et avoir un meilleur aperçu.
 	<br /><br />La dernière partie crée des dossiers csv, avec des valeurs importantes, pour le code en C.<br /><br />
-	La partie en C comporte plusieurs fonctions avant de les appeler et ajouter du texte dans la fonction main.
-	LA première fonction permet de lire les fichiers csv et dans le main nous créons deux tableaux malloc. Nous créont aussi deux fonctions pour simuler des températures futures. 
-	Ainsi, nous avons deux débit, qui comprennent uniquement la fonte de la glace, avec ou sans le scénario. Le modèle de fonte est le même que sur python. 
-	Quelques fonctions nous permettent de calculer les volumes et masses, pour voir les pertes ou les gains. Pour finir nous avons décider de simuler un lac de glacier et voir son évoltuion.
+	La partie en C comporte plusieurs fonctions, avant de les appeler et ajouter du texte dans la fonction main.
+	La première fonction permet de lire les fichiers csv et dans le main nous créons deux tableaux malloc. Nous créons aussi deux fonctions pour simuler des températures futures. 
+	Ainsi, nous avons deux débits, qui comprennent uniquement la fonte de la glace, avec ou sans le scénario. Le modèle de fonte est le même que sur python. 
+	Quelques fonctions nous permettent de calculer les volumes et masses, pour voir les pertes ou les gains. Pour finir nous avons décidé de simuler un lac de glacier et voir son évoltuion.
 	Nous avons estimer que le lac avait un débit stable avec un débit entrant et sortant égal et donc celui de notre modèle de base. 
 	La simulation étudie la montée du niveau du lac si le débit arrivant augmente rapidement (instantanément dans notre code) 
 	Le débit arrivant dans le lac est celui du scénario (2100), celui qui sort est le débit de notre modèle de base (2020).
@@ -95,22 +94,22 @@
     <p>Grâce à ces graphique nous anaylsons comment la pente affecte l'avancée du glacier. 
     Dans un cas où la pente est plus forte sur le front du glacier, l'épaisseur sera plus fine et fondra plus vite.
     Ce modèle de vitesse montre la distance (en abscisse) où le glacier s'étend selon la pente (finale) et les années.
-    Selon le terrain sous le glacier et la distance avec la roche, les champs de vitesse inégales provoqueraient des crevasses.
+    Selon le terrain sous le glacier et la distance avec la roche, les champs de vitesses inégales provoqueraient des crevasses.
     Si nous connaissons précisément ces données, nous pouvons estimer l'endroit où les crevasses se formeraient.<br /><br /></p>
     
     <h3>Différence des températures entre 1985 et 2016</h3>
-    <p>Mettre en graphique les deux époques permet de comparer l'évolution de température en 30 ans et ensuite comprendre d'où vient la fonte.
+    <p>Mettre en graphique les deux époques permet de comparer l'évolution de températures en 30 ans et ensuite comprendre d'où vient la fonte.
     Pour plus de visibilité, nous faisons une moyenne par mois sur les cinq années. 
     Pour garder un esprit critique et plus de précision, nous avons en dessous le graphique avec une moyenne par semaine.
     De ce faite, nous voyons que les températures peuvent monter au dessus du 0°C.
-    En abscisse nous avons les jours et en ordonnée la température du sommet du glacier, donné en Kelvin.</p>
+    En abscisse nous avons les jours et en ordonnée la température du sommet du glacier, donnée en Kelvin.</p>
     
     <div><img alt="différences de temprératures entre 1985 et 2016" src="Figure_temperatures.png" height="300" width="700"></div>
     <div><img alt="différences de temprératures entre 1985 et 2016" src="Figure_temperatures2.png" height="300" width="700"></div>
     <p>On observe des différences trop légères pour présenter une réelle augmentation de la température. 
-    Or, le graphique en 2016 montre des température plus ample donc plus extrême. 
-    On remarque que les étés en 2016 sont plus long, car en général, au niveau de la courbe en été, la courbe bleue est plus large que celle en orange.
-    Selon les températures et les précipitation nous pouvons facilement voir l'évolution à l'aide des graphiques suivant.</p>
+    Or, le graphique en 2016 montre des températures plus amples donc plus extrêmes. 
+    On remarque que les étés en 2016 sont plus longs, car en général, au niveau de la courbe en été, la courbe bleue est plus large que celle en orange.
+    Selon les températures et les précipitations nous pouvons facilement voir l'évolution à l'aide des graphiques suivants.</p>
   
     <h3>Modèle d'accumulation et d'ablation</h3>
     <p>Grâce à ce graphique, nous pouvons observer un maximum d'éléments et comprendre certains phénomènes.
@@ -123,12 +122,12 @@
 	Ainsi, si on calcul le volume totale sous la courbe rouge (avec la largeur) on ne ferait que d'augementer.
 	Nous ne considérons pas le modèle de fonte sur la partie effondrée.
     L'effondremet est très imprévisible et selon sa forme,
-	trop de paramètres entrent en jeu pour réussir à faire une approximation.
+	trop de paramètres entrent en jeu pour réussir à faire une bonne approximation.
 	Ici, notre modèle veut surtout étudier la différence de volume le long du glacier.</p>
 	<div><img alt="" src="Figure_glacier2.png" height="300" width="300"></div>
 	
 	<p>La courbe bleue claire représente le glacier initial. Nous observons la courbe bleue et rouge qui se superposent.
-	La bleue vient de la fonte à cause des présipitation lorsque la température est au dessus de 0°C.
+	La bleue vient de la fonte à cause des précipitations lorsque la température est au dessus de 0°C.
 	On voit une différence d'environ 4 mètres sur la partie basse du glacier.</p>
 	<div><img alt="" src="Figure_glacier3.png" height="200" width="600"></div>
 	
@@ -141,14 +140,14 @@
 	<p>Avec: <br /><strong>H</strong> (hauteur en mètre d'une colonne x au temps t)<br /><strong>Ts</strong> (température en Kelvin d'une colonne x au temps t)<br />
 	<strong>Ct = 2.215 [W/(m*K)] </strong>(conductivité thermique)<br /><strong>Tr = 273 [K]<br />p = 917 [kg/m^3]<br />
 	Cl = 3.3 * 10^5 [J/g] </strong>(chaleur latente)<br /></p>
-	On voit une légère fonte, négligeable à côté de celle des pluies, dû à la faible quantité de température au dessus de 0°C.
+	On voit une légère fonte, négligeable à côté de celle des pluies, dû à la faible quantité de températures au dessus de 0°C.
 	On le remarque sur le graphique des températures(1.2). La fonte est de l'ordre de 0.005 mètre au maximum, soit à la base du glacier</p>
     <div><img alt="" src="Figure_glacier4.png" height="300" width="900"></div>
 
 
     <h4>Visualisation en 3D</h4>
     <p>Nous pouvons visualiser le glacier en trois dimensions. Le glacier en bleu clair corespond à sa forme initiale. 
-    A cause de la grandeur du glacier et la faible fonte, les différences sont moins visible. Or, l'image avec le glacier en rouge montre la forme finale avec la fonte et la vitesse.
+    A cause de la grandeur du glacier et la faible fonte, les différences sont moins visibles. Or, l'image avec le glacier en rouge montre la forme finale avec la fonte et la vitesse.
     Pour mieux visualiser ces images, le code en python permet de voir tout les angles et de remarquer l'évolution.</p>
 	<div><img alt="glacier 3D initial" src="Figure_glacier3d2.png" height="450" width="900" align="left"></div>
     <div><img alt="glacier 3D après 5 ans" src="Figure_glacier3d1.png" height="450" width="900" align="right"></div>
@@ -157,11 +156,11 @@
     <p>Selon le modèle de base sur python, le volume du glacier diminue de: <strong>2.703 * 10^10 [m^3]</strong> à <strong>2.701 * 10^10 [m^3]</strong>, 
     la masse totale du glacier diminue de: <strong>2.479 * 10^13 [Kg]</strong> à <strong>2.477 * 10^13 [Kg]</strong>, ce qui correspond à une baisse de: <strong>0.0009%</strong> sur 5 années.<br />
 	<br />Nous avons fait un scénario qui simule aussi la fonte du même glacier environ 80 ans plus tard, 
-	avec des températures qui devrait augementer et des vagues de chaleurs plus longues et plus intenses.<br /><br />
+	avec des températures qui devrait augmenter et des vagues de chaleurs plus longues et plus intenses.<br /><br />
 	Le débit moyen est de: <strong>22863.72 [m^3/j]</strong>, le débit moyen de notre scénario est de: <strong>130779.56 [m^3]</strong>, 
 	soit une augementation de <strong>5.72%</strong>.<br /><br />
 	Mettons un lac de 15m de profondeur et une superficie de 3,2 [km^2], ces dimensions sont prises pour un lac moyen de glacier.
-	En considérant comme unique affluent l'eau venant des glaciers, le niveau du lac augemente de <strong>1.24 [m]</strong> au bout de 5ans.<br /><br />
+	En considérant comme unique affluent l'eau venant des glaciers, le niveau du lac augementerai de <strong>1.24 [m]</strong> au bout de 5ans.<br /><br />
 	Le volume final, avec le scénario est de: <strong>2.681 * 10^10 [m^3]</strong>, il y a donc une diminution de <strong>0.0082%</strong>. 
 	Soit <strong>1.97 * 10^8 [m^3]</strong> de moins que selon notre modèle de base</p>
     
@@ -169,9 +168,9 @@
     <p>En conclusion, nous avons pu observer l’impact des différentes données sur l’évolution du glacier. 
     Effectivement, la fonte des glaciers dépend non seulement des températures moyennes et précipitations journalières mais surtout de l’épaisseur initiale, de la pente et de l’altitude. 
     Les trois glaciers étudiés ont des épaisseurs initiales et des altitudes différentes et nous voyons que la différence de fonte est importante entre les glaciers et faible entre les différentes époques pour un même glacier.
-    En effet, pour les dates 1985-1989 les températures moyennes étaient quelques degrés en dessous que pour la période 2016-2020, notre simulation montre une différence de fonte moins importante. 
-    Enfin, nous avons vu les limites de notre modélisation, en particulier pour notre modèle de fonte qui montre des résultats pour cinq ans bien inférieure à nos attentes. 
-    Ceci est dû au fait que nous n’avons pas pu prendre en compte tout les facteurs, et avons dû nous contenter d’un modèle plus simplifié comme le nôtre. <br /><br /><br /><br /><br /><br /></p>
+    En effet, pour les dates 1985-1989 les températures moyennes étaient quelques degrés en dessous que pour la période 2016-2020, notre simulation montre une différence de fonte assez faible. 
+    Enfin, nous avons vu les limites de notre modélisation, en particulier pour notre modèle de fonte qui montre des résultats pour cinq ans bien inférieurs à nos attentes. 
+    Ceci est dû au fait que nous n’avons pas pu prendre en compte tous les facteurs, et avons dû nous contenter d’un modèle plus simplifié comme le nôtre. <br /><br /><br /><br /><br /><br /></p>
     
     <p><I>Van der Bruggen Gaetane, Bojaly Alberto</I></p>
 </body>
