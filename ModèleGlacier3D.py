@@ -4,14 +4,14 @@ Il se forme grâce aux couches de neige qui viennent se superposer.
 Écrasée sous son propre poids, la neige se compact et rejete les substances gazeuses.
 Ainsi, elle se soude en une masse dense et homogène pour se transformer en glace.
 
-Les glaciers sont des reserves primordiales en eau douce. De nos jours, ils sont le sujet de nombreuses discussions.
-C'est pourquoi, nous avons décidé de vérifier, à l'aide de nos connaissances en informatique, comment et à quelle vitesse
-le plus grand glacier des alpes devrait fondre...
+Les glaciers sont des reserves primordiales en eau douce. De nos jours, 
+ils sont le sujet de nombreuses discussions.
+C'est pourquoi, nous avons décidé de vérifier, à l'aide de nos connaissances en informatique, 
+comment et à quelle vitesse le plus grand glacier des alpes devrait fondre...
 
-Nous voulons aussi que ce code soit les plus facilement modifiable pour s'appliquer sur d'autre glacier avec des données météo
-et des tailles différentes.
+Nous voulons aussi que ce code soit les plus facilement modifiable pour s'appliquer 
+sur d'autre glacier avec des données météo et des dimensions différentes...
 '''
-
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -20,9 +20,7 @@ import csv
 from matplotlib.widgets import Slider
 import matplotlib.animation as animation
 
-
-
-# recuperer les donnees necessaires a notre simulation du fichier meteoblue json
+#choix du glacier
 glacier = input("Entrez un des glaciers entre Aletsch, Rosablanche (Glacier du Grand Désert) et Grand Combin (Glacier Corbassière): ")
 if glacier == "Aletsch":
     H = 900  
@@ -48,6 +46,7 @@ elif glacier == "Grand Combin":
 else: 
     print("Vérifiez que le nom est bien écrit, si oui nous n'avons pas les données pour ce glacier")
 
+# recuperer les donnees necessaires a notre simulation du fichier meteoblue json
 def telecharger(dossier):
     with open(dossier, "r") as donnees_initiales:
         donnees_initiales = json.load(donnees_initiales)
@@ -155,6 +154,7 @@ Yy = L1+ tps*(V + k*math.sin(math.atan(P))*(H-x)*(2*H-(H-x))*3600*24/2)
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
+plt.subplots_adjust(bottom=0.25)
 ax.set_aspect('equal', adjustable='box')
 plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
@@ -167,7 +167,7 @@ plt.plot(deplacement12, x, label=f"Glacier après {tps} jours et après effondre
 Pp = plt.plot(Yy, x, label='glacier selon la pente', color = 'darkblue')
 plt.legend(loc= 'upper left')
 
-ax_slide = plt.axes([0.1, 0.9, 0.5, 0.05])
+ax_slide = plt.axes([0.1, 0.2, 0.5, 0.05])
 s_factor = Slider(ax_slide, 'Pente', valmin = 0, valmax = 0.5, valinit = P, valstep = 0.01)
 
 def update(val):
@@ -177,7 +177,6 @@ def update(val):
     plt.draw()  
      
 s_factor.on_changed(update)
-#fig.savefig('Figure_1.jpeg')
     
 #Modele d'enneigement, Accumulation. Modele de fonte, Ablation---------------------------------------------------//
 Coeff = 0.01  # coeff d'enneigement par rapport à l'altitude (plus réaliste)
@@ -221,10 +220,10 @@ del Tsgraph1985x[1155]
 
 Tsgraph = []
 Tsgraph1985 = []
-Kelvin0 = []
-Moy = 7   #Modifier pour mieux analyser les données des températures
+Kelvin273 = []
+Moy = 7   #A Modifier pour mieux analyser les données des températures
 for i in range(0, tps1985-Moy, Moy):
-    Kelvin0.append(273)
+    Kelvin273.append(273)
     temp = 0.0
     temp1985 = 0.0
     for j in range(i, i + Moy):
@@ -236,18 +235,21 @@ for i in range(0, tps1985-Moy, Moy):
 axe = np.linspace(0, tps, int((tps1985-1)/Moy))
 fig = plt.figure()
 ax = fig.add_subplot(111)
-plt.plot(axe, Tsgraph, label='températures de 2016 à 2020', color = 'blue')
-plt.plot(axe, Tsgraph1985, label='températures de 1985 à 1989', color = 'orange')
-plt.plot(axe, Kelvin0, label='273 Kelvin, 0°', color = 'black')
+Tt = plt.plot(axe, Tsgraph, label='températures de 2016 à 2020', color = 'blue')
+Tt1 = plt.plot(axe, Tsgraph1985, label='températures de 1985 à 1989', color = 'orange')
+plt.plot(axe, Kelvin273, label='273 Kelvin, 0°', color = 'black')
 plt.grid()
 plt.legend()
 
-E = []  #on commence l'année avec un enneigement initiale de (2m si en hiver)
+
+#----------------------------------------------------------------------------//
+E = []  #on commence l'année avec un enneigement initiale de 1m. 
 E1985 = []
 for i in range(L_incr):
     E.append(1.0)
     E1985.append(1.0)
-    
+
+#hauteur au temps t.
 htt = []
 htt1985 = []
 for i in range(L_incr):
@@ -261,11 +263,14 @@ L'effondremet est très imprévisible et selon sa forme,
 trop de paramètres rentrent en jeu pour réussir à faire une faible approximation.
 Notre modèle veut surtout étudier la différence de volume le long du glacier.
 '''    
-nbrsj = 4 #nbrs jour pour transformer en glace:
+nbrsj = 10 #nbrs jour pour transformer en glace:
 def evolution(precipitation, temperatures, enneigement, temps, hauteurtempst):
+    
+    #La neige tombée à eu le temps de se compresser et se transformer en glace.
     for i in range(temps-nbrsj):
         for j in range(L_incr):
             if temperatures[i][j] <= 273:
+                #la division par 10 est pour passer de neige à glace. 
                 valeur = precipitation[i]/10 + enneigement[j] - Coeff*P*j*delta*precipitation[i]/10
                 if valeur > 0:
                     hauteurtempst[j] += valeur - enneigement[j]
@@ -273,6 +278,7 @@ def evolution(precipitation, temperatures, enneigement, temps, hauteurtempst):
                     enneigement.insert(j, valeur)
             
             else:
+                #Fonte par pluie
                 valeur = enneigement[j] - precipitation[i]/10
                 del enneigement[j]
                 enneigement.insert(j, valeur)
@@ -281,7 +287,8 @@ def evolution(precipitation, temperatures, enneigement, temps, hauteurtempst):
                 fonte = hauteur**(1/2)
                 del hauteurtempst[j]
                 hauteurtempst.insert(j, fonte)
-                    
+                
+    #La neige tombée est encore fraiche                
     for i in range(nbrsj):
         for j in range(L_incr):
             if temperatures[i][j] <= 273:
@@ -292,6 +299,7 @@ def evolution(precipitation, temperatures, enneigement, temps, hauteurtempst):
                     enneigement.insert(j, valeur)
 
             else:
+                #Fonte par pluie
                 valeur = enneigement[j] - precipitation[i]/10
                 del enneigement[j]
                 enneigement.insert(j, valeur)
@@ -305,9 +313,6 @@ evolution(Valeursprecipitation, Ts, E, tps, htt)
 evolution(Valeursprecipitation1985, Ts1985, E1985, tps1985, htt1985)
 
 #Graphique 2D----------------------------------------------------------------//
-'''
-Pour voir le rectangle et pas juste la fonction on utilise une liste, pas comme le graph de yy
-'''
 # hauteur glacier au temps t0
 Z = [BaseR + P*L]
 for i in range(L_incr-2):
@@ -359,18 +364,17 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set_aspect('equal', adjustable='box')
 plt.plot(xx, Varneige, label="Enneigement", color='darkblue')
-plt.plot(xx, Z, label="Glacier au temps t0", color='lightblue')
+plt.plot(xx, Z, label="Glacier au temps t0 (2016)", color='lightblue')
 plt.plot(xxx, yy, label="Roche", color="black")
-plt.plot(xxx1, ht, label="Glacier au temps t", color="red")
+plt.plot(xxx1, ht, label="Glacier au temps t (2020)", color="red")
 plt.plot(deplacement1, yyy1, color="red")
 plt.plot(deplacement, yyy, ':', label = f'glacier après {tps} jours', color="green")
 plt.plot(xxx2, pente_v, ':', color = 'green')
-plt.plot(xx, Varneige1985, label="Enneigement en 1985", color='orange')
-plt.plot(xx, htt1985, color='violet')
+plt.plot(xx, Varneige1985, label="Enneigement en 1989", color='orange')
+plt.plot(xx, htt1985, label="Glacier au temps t (1989)", color='violet')
 plt.xlabel("longueur [m]")
 plt.ylabel("hauteur [m]")
 plt.legend()
-
 
 
 # Graphique 3D---------------------------------------------------------------//
@@ -419,7 +423,6 @@ ZgT2 = []
 for i in range(Larg):
     ZgT2.append(deplacement1)
 Zgt2 = np.array(ZgT2)
-
 
 xxx2 = np.linspace(100, Larg+100, Larg)
 xxx1 = np.linspace(0, L+Xmin*delta, Xmin + L_incr)

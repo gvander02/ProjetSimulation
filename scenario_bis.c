@@ -247,7 +247,7 @@ int main(){
     double niveau = niveau_lac(tps, moyenne_debit_jours, debit_scen, 3200000, 15);
     double delta_niveau = niveau - 15; 
     printf("Admettons un lac de 15 m de profondeur et une superficie de 3,2km^2, Ces dimensions sont prises pour un lac moyen de glacier."); 
-    printf("En considerant comme unique affluent l'eau venant des glaciers, le niveau du lac augementerait de %f m en 2100, selon le scenario.\n\n", delta_niveau);
+    printf("En considerant comme unique affluent l'eau venant des glaciers, le niveau du lac augementerait de %0.2f m en 2100, selon le scenario.\n\n", delta_niveau);
     
     
     //tableau des differences avec le nouveau modele de fonte
